@@ -1,5 +1,13 @@
 # Changelog
 
+## [🐛 Fix detected: 1.0.1 -> 1.0.2
+
+1.0.2] - 2025-11-03
+
+### Fixed
+
+- remove unused variable and unnecessary eslint-disable
+
 ## [🐛 Fix detected: 1.0.0 -> 1.0.1
 
 1.0.1] - 2025-11-03
