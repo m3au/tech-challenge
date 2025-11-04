@@ -1,5 +1,13 @@
 # Changelog
 
+## [✨ Feature detected: 1.1.2 -> 1.2.0
+
+1.2.0] - 2025-11-04
+
+### Added
+
+- **tests**: add test utilities for attachments, bug reporting, and step decorators
+
 ## [🐛 Fix detected: 1.1.1 -> 1.1.2
 
 1.1.2] - 2025-11-04

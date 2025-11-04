@@ -1,0 +1,60 @@
+name: Unit Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.20
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run unit tests with coverage
+        run: bun test --coverage --coverage-reporter=lcov
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-tests-coverage
+          path: coverage/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Generate coverage summary
+        run: |
+          mkdir -p test-output/unit-tests
+          if [ -f "coverage/lcov.info" ]; then
+            # Copy lcov.info to output directory for the HTML report to load
+            cp coverage/lcov.info test-output/unit-tests/lcov.info
+            # Copy the HTML template
+            cp .github/templates/unit-tests-report.html test-output/unit-tests/index.html
+          else
+            # Use template as placeholder if no coverage data
+            cp .github/templates/unit-tests-report.html test-output/unit-tests/index.html
+          fi
+
+      - name: Upload unit test report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-tests-report
+          path: test-output/unit-tests/
+          retention-days: 30
+          if-no-files-found: ignore
