@@ -1,6 +1,6 @@
 import { CableSelectorPopup } from '@components/cable-selector-popup';
 import { Fixture, Given, Then, expect, type Page, type Locator, When, Step } from '@world';
-import { getRandomIndex } from '@utils';
+import { getRandomIndex, setTestContext } from '@utils';
 import { getEnvironment } from '@data/config';
 
 @Fixture('CableConfiguratorPage')
@@ -20,7 +20,10 @@ export class CableConfiguratorPage {
   private manufacturerPaginationRightArrowLocator: Locator;
   private productListLocator: Locator;
   private productLinkLocator: Locator;
+  private productPaginationLocator: Locator;
+  private productPaginationNextLocator: Locator;
   private selectedManufacturerCount: number | undefined;
+  private selectedManufacturerName: string | undefined;
   private serverProductCount: number | undefined;
 
   constructor(protected page: Page) {
@@ -45,6 +48,12 @@ export class CableConfiguratorPage {
       this.manufacturerSectionLocator.locator('.scroll .arrow.active');
     this.productListLocator = this.page.locator('.cg-articles-list .fx-product-list-entry');
     this.productLinkLocator = this.page.locator('.cg-articles-list a.product__content');
+    this.productPaginationLocator = this.page.locator(
+      '.cg-articles-list .pagination, .cg-articles-list .fx-pagination',
+    );
+    this.productPaginationNextLocator = this.page.locator(
+      '.cg-articles-list .pagination a[rel="next"], .cg-articles-list .fx-pagination a[rel="next"], .cg-articles-list .pagination .next, .cg-articles-list .fx-pagination .next',
+    );
   }
 
   @Given('I navigate to the cable guy page')
@@ -59,7 +68,8 @@ export class CableConfiguratorPage {
     await this.iVerifyCableConfiguratorReady();
     await this.iClickCableBeginning();
     await this.cableSelectorPopup.iSeeTheCableSelectorPopup();
-    await this.cableSelectorPopup.iSelectCableOfType(type);
+    const actualType = await this.cableSelectorPopup.iSelectCableOfType(type);
+    setTestContext({ cableBeginningType: actualType });
   }
 
   @Step
@@ -72,7 +82,8 @@ export class CableConfiguratorPage {
   async selectEndCableType(type: string) {
     await this.iClickCableEnd();
     await this.cableSelectorPopup.iSeeTheCableSelectorPopup();
-    await this.cableSelectorPopup.iSelectCableOfType(type, true);
+    const actualType = await this.cableSelectorPopup.iSelectCableOfType(type, true);
+    setTestContext({ cableEndType: actualType });
   }
 
   @When('I select a cable beginning connector of type {string}')
@@ -84,8 +95,9 @@ export class CableConfiguratorPage {
       await this.cableSelectorPopup.iSeeTheCableSelectorPopup();
     }
 
-    await this.cableSelectorPopup.iSelectConnector(connector);
+    const actualConnector = await this.cableSelectorPopup.iSelectConnector(connector);
     await this.iSeeTheBeginningConnectorSelected();
+    setTestContext({ cableBeginningConnector: actualConnector });
   }
 
   @When('I select a cable end connector of type {string}')
@@ -97,9 +109,11 @@ export class CableConfiguratorPage {
       await this.cableSelectorPopup.iSeeTheCableSelectorPopup();
     }
 
-    await this.cableSelectorPopup.iSelectConnector(connector);
+    const actualConnector = await this.cableSelectorPopup.iSelectConnector(connector);
     await this.iSeeTheEndConnectorSelected();
+    await this.iWaitForManufacturerListUpdate();
     await this.iWaitForLoadingSpinnerToDisappear();
+    setTestContext({ cableEndConnector: actualConnector });
   }
 
   @Step
@@ -161,8 +175,78 @@ export class CableConfiguratorPage {
         this.serverProductCount = count;
       }
     } catch {
-      // API response might have already completed, continue
+      // Continue if API response already completed
     }
+  }
+
+  /**
+   * Waits for manufacturer list update after selecting end connector.
+   * The list updates via AJAX - waits for both backend response and frontend DOM update.
+   */
+  @Step
+  private async iWaitForManufacturerListUpdate() {
+    await this.iWaitForManufacturerAjaxResponse();
+    await this.iWaitForManufacturerFrontendUpdate();
+  }
+
+  /**
+   * Waits for AJAX response that updates manufacturer list based on cable configuration.
+   */
+  @Step
+  private async iWaitForManufacturerAjaxResponse() {
+    try {
+      const { environment } = getEnvironment();
+      const baseUrlHostname = new URL(environment.baseUrl).hostname;
+
+      await this.page.waitForResponse(
+        (response) => {
+          const url = response.url();
+          return (
+            url.includes(baseUrlHostname) &&
+            url.includes('cableguy_ajax.html') &&
+            response.request().method() === 'GET'
+          );
+        },
+        { timeout: 10_000 },
+      );
+    } catch {
+      // Continue if AJAX response already completed
+    }
+  }
+
+  /**
+   * Waits for frontend to finish updating manufacturer list DOM after AJAX response.
+   * The frontend adds/removes manufacturers based on availability - waits until all items are rendered.
+   */
+  @Step
+  private async iWaitForManufacturerFrontendUpdate() {
+    await expect(this.manufacturerSectionLocator).toBeVisible({ timeout: 10_000 });
+
+    await this.page
+      .waitForFunction(
+        () => {
+          // eslint-disable-next-line no-undef -- document is available in browser context
+          const manufacturerItems = document.querySelectorAll('.cg-brands .items .item');
+          if (manufacturerItems.length === 0) return false;
+
+          // Count items that have been rendered (have image or text content)
+          let processedCount = 0;
+          for (const item of manufacturerItems) {
+            const hasImage = item.querySelector('img') !== null;
+            const hasContent = item.textContent && item.textContent.trim().length > 0;
+            if (hasImage || hasContent) {
+              processedCount++;
+            }
+          }
+
+          return processedCount === manufacturerItems.length && processedCount > 0;
+        },
+        { timeout: 5000 },
+      )
+      .catch(() => {});
+
+    // Additional delay to ensure DOM mutations have settled
+    await this.page.waitForTimeout(500);
   }
 
   @Step
@@ -177,7 +261,10 @@ export class CableConfiguratorPage {
     if (totalCount === 0) throw new Error('No manufacturers available to select');
 
     const randomIndex = getRandomIndex(totalCount);
-    await this.iClickManufacturer(randomIndex);
+    const manufacturer = this.manufacturerItemLocator.nth(randomIndex);
+    await manufacturer.waitFor({ state: 'attached', timeout: 5000 });
+    const manufacturerName = await this.iGetManufacturerName(manufacturer);
+    await this.iClickManufacturer(randomIndex, manufacturerName);
   }
 
   @Step
@@ -195,11 +282,11 @@ export class CableConfiguratorPage {
       const refreshedLocator = this.manufacturerItemLocator.filter({
         has: this.page.locator(`img[alt="${manufacturerName}"]`),
       });
-      await this.iClickManufacturerByLocator(refreshedLocator.first());
+      await this.iClickManufacturerByLocator(refreshedLocator.first(), manufacturerName);
       return;
     }
 
-    await this.iClickManufacturerByLocator(manufacturerLocator.first());
+    await this.iClickManufacturerByLocator(manufacturerLocator.first(), manufacturerName);
   }
 
   @Step
@@ -288,19 +375,21 @@ export class CableConfiguratorPage {
   }
 
   @Step
-  private async iClickManufacturer(index: number) {
+  private async iClickManufacturer(index: number, _manufacturerName: string) {
     const manufacturer = this.manufacturerItemLocator.nth(index);
     await manufacturer.waitFor({ state: 'attached', timeout: 5000 });
     await expect(manufacturer).toBeVisible();
     await this.iCaptureManufacturerCount(manufacturer);
+    await this.iCaptureManufacturerName(manufacturer);
     await this.iClickManufacturerItem(manufacturer);
   }
 
   @Step
-  private async iClickManufacturerByLocator(manufacturer: Locator) {
+  private async iClickManufacturerByLocator(manufacturer: Locator, _manufacturerName: string) {
     await manufacturer.waitFor({ state: 'attached', timeout: 5000 });
     await expect(manufacturer).toBeVisible();
     await this.iCaptureManufacturerCount(manufacturer);
+    await this.iCaptureManufacturerName(manufacturer);
     await this.iClickManufacturerItem(manufacturer);
   }
 
@@ -311,6 +400,46 @@ export class CableConfiguratorPage {
     if (countText) {
       this.selectedManufacturerCount = Number.parseInt(countText.trim(), 10);
     }
+  }
+
+  @Step
+  private async iCaptureManufacturerName(manufacturer: Locator) {
+    // Try to get manufacturer name from image alt text first
+    const imageAlt = await manufacturer
+      .locator('img')
+      .getAttribute('alt')
+      .catch(() => {
+        return '';
+      });
+    if (imageAlt) {
+      this.selectedManufacturerName = imageAlt;
+      return;
+    }
+    // Fallback to text content if image alt is not available
+    const textContent = await manufacturer.textContent();
+    if (textContent) {
+      this.selectedManufacturerName = textContent.trim();
+    }
+  }
+
+  @Step
+  private async iGetManufacturerName(manufacturer: Locator): Promise<string> {
+    // Try to get manufacturer name from image alt text first
+    const imageAlt = await manufacturer
+      .locator('img')
+      .getAttribute('alt')
+      .catch(() => {
+        return '';
+      });
+    if (imageAlt) {
+      return imageAlt;
+    }
+    // Fallback to text content if image alt is not available
+    const textContent = await manufacturer.textContent();
+    if (textContent) {
+      return textContent.trim();
+    }
+    return 'unknown';
   }
 
   @Step
@@ -339,13 +468,66 @@ export class CableConfiguratorPage {
 
   @Step
   private async iVerifyManufacturerProductCount() {
-    const serverCount = this.serverProductCount ?? (await this.productListLocator.count());
+    if (this.serverProductCount === undefined) {
+      throw new Error('Server product count not available from AJAX response');
+    }
+    if (this.selectedManufacturerCount === undefined) {
+      throw new Error('Manufacturer count not available from badge');
+    }
+
     expect
       .soft(
-        serverCount,
-        `Manufacturer product count mismatch: Expected ${this.selectedManufacturerCount} products (from manufacturer badge), but server returned ${serverCount} products`,
+        this.serverProductCount,
+        `Manufacturer product count mismatch: Server AJAX response indicates ${this.serverProductCount} products, but manufacturer badge shows ${this.selectedManufacturerCount} products`,
       )
       .toBe(this.selectedManufacturerCount);
+  }
+
+  /**
+   * Checks if there's a next page of products available.
+   */
+  @Step
+  private async iHasNextProductPage(): Promise<boolean> {
+    const nextButtonVisible = await this.productPaginationNextLocator
+      .isVisible()
+      .catch(() => false);
+    if (nextButtonVisible) {
+      const isDisabled = await this.productPaginationNextLocator
+        .evaluate((element) => {
+          return (
+            element.classList.contains('disabled') ||
+            element.hasAttribute('disabled') ||
+            element.getAttribute('aria-disabled') === 'true'
+          );
+        })
+        .catch(() => false);
+      return !isDisabled;
+    }
+
+    // Alternative: Check for pagination indicators (e.g., "page 1 of 2")
+    const paginationText = await this.productPaginationLocator.textContent().catch(() => {
+      return '';
+    });
+    if (paginationText) {
+      const pageMatch = paginationText.match(/page\s+(\d+)\s+of\s+(\d+)/i);
+      if (pageMatch) {
+        const currentPage = Number.parseInt(pageMatch[1]!, 10);
+        const totalPages = Number.parseInt(pageMatch[2]!, 10);
+        return currentPage < totalPages;
+      }
+    }
+
+    return false;
+  }
+
+  @Step
+  private async iNavigateToNextProductPage() {
+    const nextButton = this.productPaginationNextLocator.first();
+    await nextButton.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {
+      throw new Error('Next page button not found or not visible');
+    });
+    await nextButton.click({ timeout: 5000 });
+    await this.page.waitForTimeout(500);
   }
 
   @When('I select the product {string}')
