@@ -1,5 +1,13 @@
 # Changelog
 
+## [🐛 Fix detected: 1.1.1 -> 1.1.2
+
+1.1.2] - 2025-11-04
+
+### Fixed
+
+- **tests**: use AJAX response count instead of paginating through pages
+
 ## [🐛 Fix detected: 1.0.2 -> 1.0.3
 
 1.0.3] - 2025-11-03
