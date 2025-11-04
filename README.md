@@ -5,9 +5,9 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue)](https://www.typescriptlang.org/)
 [![Playwright](https://img.shields.io/badge/Playwright-1.56-green)](https://playwright.dev/)
 [![playwright-bdd](https://img.shields.io/badge/playwright--bdd-8.4-orange)](https://github.com/vitalets/playwright-bdd)
-[![Bun](https://img.shields.io/badge/Bun-1.2-black)](https://bun.sh/)
+[![Bun](https://img.shields.io/badge/Bun-1.3-black)](https://bun.sh/)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20.0.0-brightgreen)](https://nodejs.org/)
-[![ESLint](https://img.shields.io/badge/ESLint-9.38-purple)](https://eslint.org/)
+[![ESLint](https://img.shields.io/badge/ESLint-9.39-purple)](https://eslint.org/)
 [![Prettier](https://img.shields.io/badge/Prettier-code--formatter-pink)](https://prettier.io/)
 [![Axe Core](https://img.shields.io/badge/Axe%20Core-4.11-blue)](https://github.com/dequelabs/axe-core)
 [![Lighthouse](https://img.shields.io/badge/Lighthouse-13.0-blue)](https://developer.chrome.com/docs/lighthouse/)
@@ -164,18 +164,18 @@ cp .env.example .env
 
 The `.env` file supports the following configuration options:
 
-| Variable           | Description                                                                                                 | Default          |
-| :----------------- | :---------------------------------------------------------------------------------------------------------- | :--------------- |
-| `BASE_URL`         | Base URL for the application under test                                                                     | -                |
-| `TIMEOUT`          | Global timeout for all Playwright actions (milliseconds)                                                    | `30000`          |
-| `EXPECT_TIMEOUT`   | Timeout for assertions (milliseconds)                                                                       | `15000`          |
-| `WORKERS`          | Number of parallel test workers (number or percentage; percentage is calculated based on machine CPU cores) | `50%`            |
-| `RETRIES`          | Number of times to retry failed tests                                                                       | `1`              |
-| `REPEAT_EACH`      | Number of times to repeat each test (0 = disabled)                                                          | `0`              |
-| `CHROMIUM_ENABLED` | Enable/disable Chromium browser tests                                                                       | `true`           |
-| `FIREFOX_ENABLED`  | Enable/disable Firefox browser tests                                                                        | `false`          |
-| `WEBKIT_ENABLED`   | Enable/disable WebKit browser tests                                                                         | `false`          |
-| `TRACE`            | Trace mode for debugging                                                                                    | `on-first-retry` |
+| Variable           | Description                                              | Default          |
+| :----------------- | :------------------------------------------------------- | :--------------- |
+| `BASE_URL`         | Base URL for the application under test                  | -                |
+| `TIMEOUT`          | Global timeout for all Playwright actions (milliseconds) | `40000`          |
+| `EXPECT_TIMEOUT`   | Timeout for assertions (milliseconds)                    | `15000`          |
+| `WORKERS`          | Number of parallel test workers (number or percentage)   | `50%`            |
+| `RETRIES`          | Number of times to retry failed tests                    | `1`              |
+| `REPEAT_EACH`      | Number of times to repeat each test (0 = disabled)       | `0`              |
+| `CHROMIUM_ENABLED` | Enable/disable Chromium browser tests                    | `true`           |
+| `FIREFOX_ENABLED`  | Enable/disable Firefox browser tests                     | `false`          |
+| `WEBKIT_ENABLED`   | Enable/disable WebKit browser tests                      | `false`          |
+| `TRACE`            | Trace mode for debugging                                 | `on-first-retry` |
 
 For a complete list of all configuration options, see [Development Guide](./docs/development.md#environment-configuration).
 

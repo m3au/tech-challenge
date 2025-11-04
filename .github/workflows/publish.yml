@@ -80,6 +80,13 @@ jobs:
           name: unit-tests-report
           path: test-output/unit-tests/
 
+      - name: Download unit test coverage (fallback)
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: unit-tests-coverage
+          path: test-output/unit-tests-coverage/
+
       - name: Create placeholder pages for missing reports
         run: |
           mkdir -p test-output/lighthouse test-output/axe test-output/playwright-report test-output/unit-tests
@@ -95,6 +102,15 @@ jobs:
           fi
           if [ ! -f "test-output/unit-tests/index.html" ]; then
             cp .github/templates/unit-tests-report.html test-output/unit-tests/index.html
+          fi
+          # Ensure lcov.info exists - copy from coverage artifact if missing
+          if [ -f "test-output/unit-tests/index.html" ] && [ ! -f "test-output/unit-tests/lcov.info" ]; then
+            if [ -f "test-output/unit-tests-coverage/lcov.info" ]; then
+              cp test-output/unit-tests-coverage/lcov.info test-output/unit-tests/lcov.info
+              echo "✓ Copied lcov.info from unit-tests-coverage artifact"
+            else
+              echo "Warning: unit-tests/index.html exists but lcov.info is missing and not found in coverage artifact"
+            fi
           fi
 
       - name: Copy reports index template

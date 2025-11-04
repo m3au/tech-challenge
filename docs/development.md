@@ -44,7 +44,7 @@ This guide provides setup instructions and development guidelines for the projec
 ### Prerequisites
 
 - **Node.js**: >= 20.0.0
-- **Bun**: >= 1.2.20 (package manager and runtime)
+- **Bun**: >= 1.3.1 (package manager and runtime)
 - **Git**: Latest version
 
 ### Installation
@@ -147,11 +147,32 @@ For detailed information on the tools and configuration, refer to the [Code Qual
 
 **Editor Integration:**
 
-- **Format on Save**: Enabled via VS Code workspace settings (Prettier for code, Markdownlint for markdown)
-- **ESLint**: Auto-fix on save enabled
+VS Code workspace settings (`main.code-workspace`) configure automatic code quality on save:
+
+- **Format on Save**: Prettier automatically formats files
+- **Auto-fix on save**: ESLint and markdownlint automatically fix issues
+- **Ruler at 100 characters**: Visual guide for line length
 - **TypeScript**: Real-time type checking
 - **CSpell**: Spell checking integrated into ESLint
 - **EditorConfig**: Consistent formatting across editors
+
+**Recommended Extensions:**
+
+- `editorconfig.editorconfig` - EditorConfig support
+- `esbenp.prettier-vscode` - Prettier formatter
+- `dbaeumer.vscode-eslint` - ESLint integration
+- `ms-playwright.playwright` - Playwright test support
+- `streetsidesoftware.code-spell-checker` - CSpell spell checking
+- `streetsidesoftware.code-spell-checker-german` - German spell checking
+- `DavidAnson.vscode-markdownlint` - Markdown linting
+- `alexkrechik.cucumberautocomplete` - Cucumber/Gherkin autocomplete
+- `cucumberopen.cucumber-official` - Cucumber official support
+- `redhat.vscode-yaml` - YAML support for GitHub workflows
+- `usernamehw.errorlens` - Inline error display
+- `yoavbls.pretty-ts-errors` - Enhanced TypeScript error display
+- `amatiasq.sort-imports` - Automatic import sorting
+
+These settings ensure code quality is maintained automatically as you type and save files.
 
 **Scripts:**
 
@@ -353,7 +374,7 @@ The config includes error handling that throws if `.env` file is missing.
 The `.env` file supports the following configuration options:
 
 - **`BASE_URL`** - Base URL for the application under test (e.g., `https://www.company.de`)
-- **`TIMEOUT`** - Global timeout for all Playwright actions in milliseconds (default: `30000`)
+- **`TIMEOUT`** - Global timeout for all Playwright actions in milliseconds (default: `40000`)
 - **`EXPECT_TIMEOUT`** - Timeout for assertions in milliseconds (default: `15000`)
 - **`WORKERS`** - Number of parallel test workers (number or percentage like `50%`; percentage is calculated based on machine CPU cores, default: `50%`)
 - **`RETRIES`** - Number of times to retry failed tests (default: `1`)
@@ -383,20 +404,21 @@ The `.env` file supports the following configuration options:
 The project uses modular GitHub Actions workflows:
 
 - **`ci.yml`**: Main orchestrator workflow that calls other workflows
+- **`unit-tests.yml`**: Unit tests workflow (runs before other workflows)
 - **`test.yml`**: E2E tests workflow (sharded for parallel execution)
 - **`lighthouse.yml`**: Lighthouse performance audit workflow
 - **`axe.yml`**: Axe accessibility audit workflow
 - **`publish.yml`**: Report publishing workflow (GitHub Pages)
-- **`dependabot.yml`**: Dependabot workflow that automatically pins dependency versions
+- **`dependabot.yml`**: Dependabot workflow that automatically pins dependency versions when Dependabot creates PRs
 
-Dependabot configuration is in `.github/dependabot.yml` (separate from the workflow file).
+Dependabot configuration is in `.github/dependabot.yml` (separate from workflow files). Dependabot is a GitHub feature that automatically creates pull requests for dependency updates.
 
 Workflows can run independently or be orchestrated together via the main CI workflow. Each workflow supports both `push/pull_request` triggers and `workflow_call` for reusability.
 
 **Dependabot:**
 
-- Automated dependency updates configured via `.github/dependabot.yml` (configuration file)
-- Dependabot workflow (`.github/workflows/dependabot.yml`) automatically pins dependency versions in PRs
+- Automated dependency updates configured via `.github/dependabot.yml` (configuration file, not a workflow)
+- Dependabot workflow (`.github/workflows/dependabot.yml`) automatically pins dependency versions when Dependabot creates PRs
 - Weekly updates scheduled for Mondays at 9:00 AM
 - Automatically creates PRs with pinned versions
 

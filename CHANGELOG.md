@@ -1,5 +1,13 @@
 # Changelog
 
+## [🐛 Fix detected: 1.3.1 -> 1.3.2
+
+1.3.2] - 2025-11-04
+
+### Fixed
+
+- **ci**: add missing refs to reusable workflow calls
+
 ## [🔧 Refactor detected: 1.3.0 -> 1.3.1
 
 1.3.1] - 2025-11-04

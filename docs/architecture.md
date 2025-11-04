@@ -118,6 +118,8 @@ graph LR
 
 - `world.page`: Playwright page instance
 - `world.data`: Processed environment configuration object (via `getEnvironment()` function)
+- `world.testContext`: Test context object for tracking test steps and state (used for bug reporting)
+- `world.testInfo`: Playwright TestInfo instance for test metadata and attachments
 
 The fixture calls `getEnvironment()` which reads from `process.env` and returns a structured configuration object.
 
@@ -133,13 +135,14 @@ The fixture calls `getEnvironment()` which reads from `process.env` and returns 
 The project uses modular GitHub Actions workflows for CI/CD:
 
 - **`ci.yml`**: Main orchestrator workflow that coordinates test, lighthouse, and axe workflows
+- **`unit-tests.yml`**: Unit tests workflow (runs before other workflows)
 - **`test.yml`**: E2E tests workflow with sharding for parallel execution
 - **`lighthouse.yml`**: Lighthouse performance audit workflow
 - **`axe.yml`**: Axe accessibility audit workflow
 - **`publish.yml`**: Report publishing workflow for GitHub Pages
-- **`dependabot.yml`**: Dependabot workflow that automatically pins dependency versions
+- **`dependabot.yml`**: Dependabot configuration for automated dependency updates (GitHub feature, not a workflow file)
 
-Dependabot configuration is in `.github/dependabot.yml` (separate from the workflow file).
+Dependabot configuration is in `.github/dependabot.yml` (separate from workflow files). Dependabot is a GitHub feature that automatically creates pull requests for dependency updates. The configuration file specifies which package ecosystems to monitor and how to handle updates.
 
 Workflows can run independently or be orchestrated together via the main CI workflow. Each workflow supports both `push/pull_request` triggers and `workflow_call` for reusability.
 
@@ -206,11 +209,16 @@ This creates **indirection**: Gherkin → step definition file → POM method, r
 
 ```typescript
 // configurator-page.ts (decorator approach)
+import { getEnvironment } from '@data/config';
+
 @Fixture('CableConfiguratorPage')
 export class CableConfiguratorPage {
-  @Given('I navigate to the configurator page')
+  constructor(protected page: Page) {}
+
+  @Given('I navigate to the cable guy page')
   async navigate() {
-    await this.page.goto('/intl/cableguy.html');
+    const { environment } = getEnvironment();
+    await this.page.goto(`${environment.baseUrl}/intl/cableguy.html`);
   }
 }
 ```
@@ -251,9 +259,10 @@ sequenceDiagram
 export class CableConfiguratorPage {
   constructor(protected page: Page) {}
 
-  @Given('I navigate to the configurator page')
+  @Given('I navigate to the cable guy page')
   async navigate() {
-    await this.page.goto('/intl/cableguy.html');
+    const { environment } = getEnvironment();
+    await this.page.goto(`${environment.baseUrl}/intl/cableguy.html`);
   }
 }
 ```
