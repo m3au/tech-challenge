@@ -1,5 +1,13 @@
 # Changelog
 
+## [✨ Feature detected: 1.4.2 -> 1.5.0
+
+1.5.0] - 2025-11-05
+
+### Added
+
+- **ci**: add test reports dashboard link annotation
+
 ## [🐛 Fix detected: 1.4.1 -> 1.4.2
 
 1.4.2] - 2025-11-05

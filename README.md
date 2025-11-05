@@ -2,7 +2,7 @@
 
 **AI-Piloted E2E Testing with Playwright & BDD**
 
-[![CI](https://github.com/m3au/tech-challenge/actions/workflows/ci.yml/badge.svg)](https://github.com/m3au/tech-challenge/actions/workflows/ci.yml)
+[![CI](https://github.com/m3au/playwright-pilot/actions/workflows/ci.yml/badge.svg)](https://github.com/m3au/playwright-pilot/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen)](tests/unit/)
 [![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-enabled-brightgreen)](https://github.com/features/actions)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
@@ -69,7 +69,7 @@ This project implements a complete Playwright E2E test automation framework with
 
 ![Test Reports Dashboard](docs/reports.jpg)
 
-Check 👉🏼 [GitHub Pages HTML Report](https://m3au.github.io/playwright-pilot/) for the _**Interactive HTML reports**_ generated automatically from Playwright test runs, including test results, traces, screenshots, and accessibility/performance audit reports.
+Check 👉🏼 [GitHub Pages HTML Report](https://m3au.github.io/tech-challenge/) for the _**Interactive HTML reports**_ generated automatically from Playwright test runs, including test results, traces, screenshots, and accessibility/performance audit reports.
 
 View workflow runs 👉🏼 [GitHub Actions](https://github.com/m3au/playwright-pilot/actions), we're running 30 tests using 2 shards (WORKERS=100% per shard).
 
