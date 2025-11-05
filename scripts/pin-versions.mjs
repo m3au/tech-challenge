@@ -31,7 +31,7 @@ function getInstalledVersion(packageName, basedir) {
 function getRegistryVersion(packageName, spec) {
   try {
     const cmd = `npm view ${packageName}@${spec} version --json`;
-    /* eslint-disable-next-line sonarjs/os-command -- Safe: npm view is a standard package manager command */
+    // eslint-disable-next-line sonarjs/os-command -- Safe: npm view is a standard package manager command with controlled input
     const out = execSync(cmd, { stdio: ['ignore', 'pipe', 'ignore'] })
       .toString()
       .trim();
@@ -47,6 +47,7 @@ function getRegistryVersion(packageName, spec) {
     } catch {
       // eslint-disable-next-line sonarjs/slow-regex -- Simple regex, safe for version matching
       const matches = out.match(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/g);
+      // eslint-disable-next-line sonarjs/os-command -- Safe: using sanitized output from npm view command
       if (matches && matches.length > 0) return matches.at(-1);
     }
     return;

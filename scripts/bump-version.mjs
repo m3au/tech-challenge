@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-disable unicorn/import-style */
 
 /**
  * Package.json version bumper based on Conventional Commits
@@ -12,107 +11,127 @@
  * - Other types: no bump
  */
 
-import { dirname, join } from 'node:path';
 import { readFileSync, writeFileSync } from 'node:fs';
 
 import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const packageJsonPath = join(__dirname, '..', 'package.json');
-
-try {
-  // Get commit message from command line argument
-  const commitMessage = process.argv[2] || '';
-
-  if (!commitMessage.trim()) {
-    console.log('⚠️  No commit message provided, skipping version bump');
-    process.exit(0);
-  }
-
-  // Read package.json
-  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
-  const currentVersion = packageJson.version;
-  const [major, minor, patch] = currentVersion.split('.').map(Number);
-
-  // Parse commit message
-  const commitType = commitMessage.match(
+/**
+ * Parse commit type from conventional commit message
+ * @param {string} commitMessage - The commit message to parse
+ * @returns {string | undefined} The commit type or undefined if invalid
+ */
+export function parseCommitType(commitMessage) {
+  return commitMessage.match(
     /^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?(!)?:/,
   )?.[1];
-  const isBreaking =
+}
+
+/**
+ * Check if commit message indicates a breaking change
+ * @param {string} commitMessage - The commit message to check
+ * @returns {boolean} True if breaking change detected
+ */
+export function isBreakingChange(commitMessage) {
+  return (
     commitMessage.includes('BREAKING CHANGE') ||
     commitMessage.includes('BREAKING:') ||
-    commitMessage.match(/^(feat|fix|perf|refactor)(\(.+\))?!:/);
+    /^(feat|fix|perf|refactor)(\(.+\))?!:/.test(commitMessage)
+  );
+}
 
-  let newVersion = currentVersion;
+/**
+ * Calculate new version based on commit message
+ * @param {string} currentVersion - Current semver version (e.g., "1.2.3")
+ * @param {string} commitMessage - Conventional commit message
+ * @returns {string | undefined} New version or undefined if no bump needed
+ */
+export function calculateNewVersion(currentVersion, commitMessage) {
+  const [major, minor, patch] = currentVersion.split('.').map(Number);
+  const commitType = parseCommitType(commitMessage);
+  const isBreaking = isBreakingChange(commitMessage);
 
   if (isBreaking && commitType) {
-    // Major version bump
-    newVersion = `${major + 1}.0.0`;
-    console.log(`🚀 BREAKING CHANGE detected: ${currentVersion} -> ${newVersion}`);
-  } else if (commitType === 'feat') {
-    // Minor version bump
-    newVersion = `${major}.${minor + 1}.0`;
-    console.log(`✨ Feature detected: ${currentVersion} -> ${newVersion}`);
-  } else if (commitType === 'fix' || commitType === 'perf' || commitType === 'refactor') {
-    // Patch version bump
-    newVersion = `${major}.${minor}.${patch + 1}`;
-    let emoji;
-    let typeName;
-    if (commitType === 'fix') {
-      emoji = '🐛';
-      typeName = 'Fix';
-    } else if (commitType === 'perf') {
-      emoji = '⚡';
-      typeName = 'Performance';
-    } else {
-      emoji = '🔧';
-      typeName = 'Refactor';
-    }
-    console.log(`${emoji} ${typeName} detected: ${currentVersion} -> ${newVersion}`);
-  } else {
-    console.log(
-      `ℹ️  Commit type "${commitType}" does not trigger version bump (${currentVersion})`,
-    );
-    process.exit(0);
+    return `${major + 1}.0.0`;
+  }
+  if (commitType === 'feat') {
+    return `${major}.${minor + 1}.0`;
+  }
+  if (commitType === 'fix' || commitType === 'perf' || commitType === 'refactor') {
+    return `${major}.${minor}.${patch + 1}`;
+  }
+}
+
+/**
+ * Update package.json version based on commit message
+ * @param {string} packageJsonPath - Path to package.json
+ * @param {string} commitMessage - Conventional commit message
+ * @returns {{ updated: boolean, oldVersion: string, newVersion?: string, message?: string }} Result object
+ */
+export function updatePackageVersion(packageJsonPath, commitMessage) {
+  if (!commitMessage.trim()) {
+    return { updated: false, oldVersion: '', message: 'No commit message provided' };
   }
 
-  // Update package.json
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+  const currentVersion = packageJson.version;
+  const newVersion = calculateNewVersion(currentVersion, commitMessage);
+
+  if (!newVersion) {
+    const commitType = parseCommitType(commitMessage);
+    return {
+      updated: false,
+      oldVersion: currentVersion,
+      message: `Commit type "${commitType}" does not trigger version bump`,
+    };
+  }
+
+  const commitType = parseCommitType(commitMessage);
+  const isBreaking = isBreakingChange(commitMessage);
+  const commitTypeMetadata = {
+    feat: { emoji: '✨', name: 'Feature' },
+    fix: { emoji: '🐛', name: 'Fix' },
+    perf: { emoji: '⚡', name: 'Performance' },
+    refactor: { emoji: '🔧', name: 'Refactor' },
+  };
+
+  let logMessage = '';
+  if (isBreaking && commitType) {
+    logMessage = `🚀 BREAKING CHANGE detected: ${currentVersion} -> ${newVersion}`;
+  } else if (commitType && commitTypeMetadata[commitType]) {
+    const metadata = commitTypeMetadata[commitType];
+    logMessage = `${metadata.emoji} ${metadata.name} detected: ${currentVersion} -> ${newVersion}`;
+  }
+
   packageJson.version = newVersion;
   writeFileSync(packageJsonPath, JSON.stringify(packageJson, undefined, 2) + '\n');
 
-  // Output to stderr for display, stdout for script consumption
-  if (isBreaking && commitType) {
-    console.error(`🚀 BREAKING CHANGE detected: ${currentVersion} -> ${newVersion}`);
-  } else {
-    switch (commitType) {
-      case 'feat': {
-        console.error(`✨ Feature detected: ${currentVersion} -> ${newVersion}`);
-        break;
-      }
-      case 'fix': {
-        console.error(`🐛 Fix detected: ${currentVersion} -> ${newVersion}`);
-        break;
-      }
-      case 'perf': {
-        console.error(`⚡ Performance detected: ${currentVersion} -> ${newVersion}`);
-        break;
-      }
-      case 'refactor': {
-        console.error(`🔧 Refactor detected: ${currentVersion} -> ${newVersion}`);
-        break;
-      }
-      default: {
-        // No output for other types
-        break;
-      }
-    }
-  }
+  return { updated: true, oldVersion: currentVersion, newVersion, message: logMessage };
+}
 
-  // Output new version to stdout for use by other scripts
-  process.stdout.write(newVersion);
-} catch (error) {
-  console.error('⚠️  Error bumping version:', error.message);
-  // Don't fail the commit if version bumping fails
-  process.exit(0);
+function main() {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const packageJsonPath = path.join(__dirname, '..', 'package.json');
+
+  try {
+    const commitMessage = process.argv[2] || '';
+    const result = updatePackageVersion(packageJsonPath, commitMessage);
+
+    if (!result.updated) {
+      console.log(`⚠️  ${result.message}`);
+      process.exit(0);
+    }
+
+    console.log(result.message);
+    console.error(result.message);
+    process.stdout.write(result.newVersion);
+  } catch (error) {
+    console.error('⚠️  Error bumping version:', error.message);
+    process.exit(0);
+  }
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main();
 }
