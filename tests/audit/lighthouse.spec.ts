@@ -35,15 +35,38 @@ test.describe('Performance Tests', () => {
       const port = chrome.port ?? 9222;
       await waitForPort(port);
 
+      const desktopConfig = {
+        extends: 'lighthouse:default',
+        settings: {
+          formFactor: 'desktop' as const,
+          throttling: {
+            rttMs: 40,
+            throughputKbps: 10 * 1024,
+            cpuSlowdownMultiplier: 1,
+            requestLatencyMs: 0,
+            downloadThroughputKbps: 0,
+            uploadThroughputKbps: 0,
+          },
+          screenEmulation: {
+            mobile: false,
+            width: 1350,
+            height: 940,
+            deviceScaleFactor: 1,
+            disabled: false,
+          },
+          emulatedUserAgent:
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        },
+      };
+
       const lighthouseOptions = {
         logLevel: 'info' as const,
         output: 'html' as const,
         onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
         port,
-        preset: 'desktop' as const,
       };
 
-      const runnerResult = await lighthouse(url, lighthouseOptions);
+      const runnerResult = await lighthouse(url, lighthouseOptions, desktopConfig);
 
       const lighthouseDirectory = path.join(outputDirectory, 'lighthouse');
       fs.mkdirSync(lighthouseDirectory, { recursive: true });
