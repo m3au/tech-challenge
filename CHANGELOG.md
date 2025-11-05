@@ -1,5 +1,11 @@
 # Changelog
 
+## [🐛 Fix detected: 1.5.3 -> 1.5.4
+1.5.4] - 2025-11-05
+### Fixed
+- **ci**: add loop-safe post-commit hook for version bumping
+
+
 ## [🐛 Fix detected: 1.5.2 -> 1.5.3
 
 1.5.3] - 2025-11-05
