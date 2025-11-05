@@ -2,12 +2,12 @@
 # shellcheck disable=SC1091
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Check if package.json or CHANGELOG.md are staged (from prepare-commit-msg)
+# Check if package.json or CHANGELOG.md are staged (modified by prepare-commit-msg but not yet committed)
 if git diff --cached --name-only | grep -qE '^(package\.json|CHANGELOG\.md)$'; then
   echo "📦 Including version and changelog in commit..."
   # Use HUSKY=0 to skip all hooks during amend (prevents infinite loop)
   HUSKY=0 git commit --amend --no-edit
-  
+
   # Create git tag for new version
   VERSION=$(node -p "require('./package.json').version")
   if [ -n "$VERSION" ] && ! git rev-parse "v${VERSION}" >/dev/null 2>&1; then
