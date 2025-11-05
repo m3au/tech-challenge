@@ -12,6 +12,7 @@
 - **ci**: add automatic git tagging and release management
 
 ### Fixed
+- add test documentation
 - **ci**: use diff-tree to detect files in post-commit hook
 
 - **changelog**: remove brackets from version headers to fix markdown linting
