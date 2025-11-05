@@ -1,4 +1,4 @@
-name: Unit Tests
+name: Unit Tests & Lint
 
 on:
   push:
@@ -26,6 +26,9 @@ jobs:
 
       - name: Install dependencies
         run: bun install
+
+      - name: Run lint checks
+        run: bun run lint
 
       - name: Run unit tests with coverage
         run: bun test --coverage --coverage-reporter=lcov
