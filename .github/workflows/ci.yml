@@ -144,3 +144,8 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Add report dashboard link annotation
+        if: always()
+        run: |
+          echo "::notice title=📊 Test Reports Dashboard::View interactive reports at https://m3au.github.io/playwright-pilot/"
