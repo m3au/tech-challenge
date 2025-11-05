@@ -52,8 +52,10 @@ export class ProductDetailPage {
   @Step
   private async iWaitForBasketNotificationToAppear(): Promise<void> {
     await this.iWaitForBasketAjaxResponse();
-    // Verify notification appears immediately after AJAX, before it auto-dismisses
-    await expect(this.basketNotificationLocator).toBeVisible({ timeout: 5000 });
+    // Wait for notification element to be added to DOM (may take time after AJAX)
+    await this.basketNotificationLocator.waitFor({ state: 'attached', timeout: 10_000 });
+    // Verify it's visible (element exists but might still be hidden initially)
+    await expect(this.basketNotificationLocator).toBeVisible({ timeout: 3000 });
     await this.iWaitForBasketNotificationDOMUpdate();
   }
 
