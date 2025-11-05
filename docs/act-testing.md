@@ -4,7 +4,7 @@ This guide explains how to test GitHub Actions workflows locally using [act](htt
 
 ![Placeholder](https://placecats.com/400/200)
 
-## 🛠️ Prerequisites
+## Prerequisites
 
 - **Docker** installed and running (`docker ps` should work)
 - **Act** installed (tested with **0.2.82+**)
@@ -14,13 +14,13 @@ This guide explains how to test GitHub Actions workflows locally using [act](htt
 
 **Note:** If Docker isn't running, ensure your Docker daemon is started (`docker ps` should work).
 
-## 🏃 Usage
+## Usage
 
 All local tests are run via `make` targets defined in the root `Makefile`.
 
 ### Helper Commands
 
-```bash
+```shell
 # Show all available 'make' targets
 make help
 
@@ -33,7 +33,7 @@ make test-dryrun
 
 ### Run Workflows
 
-```bash
+```shell
 # Test the primary E2E tests workflow (test.yml)
 make test
 
@@ -62,12 +62,12 @@ The `.actrc` file centralizes platform settings for consistent execution:
 - **Docker Image:** Specifies a specific image (`catthehacker/ubuntu:act-latest`) for better stability and feature support
 - **Apple Silicon (M1/M2/M3) Support:** The `--container-architecture linux/amd64` flag is added to `ACT_FLAGS` in the `Makefile` to ensure proper execution on Apple Silicon machines
 
-## ⚠️ Limitations
+## Limitations
 
 - **Reusable Workflows Not Fully Supported:** The main `ci.yml` workflow orchestrates other workflows using `workflow_call`. Since `act` does not fully support these reusable workflows, you should test the target workflows (e.g., `test.yml`, `lighthouse.yml`) **individually** using the respective `make` targets
 - Use individual workflow files directly for testing rather than the main CI workflow
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 - **Docker Not Running:** All `act` commands will fail if Docker is not active
   - **Fix:** Start your Docker daemon (e.g., open Docker Desktop, run `colima start`, etc.)

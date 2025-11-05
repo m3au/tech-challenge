@@ -7,7 +7,7 @@ This document describes all code quality configuration files in the project and 
 ## Table of Contents <!-- omit from toc -->
 
 - [Overview](#overview)
-  - [🏃 Quality Check Commands](#-quality-check-commands)
+  - [Quality Check Commands](#quality-check-commands)
 - [Linting \& Formatting](#linting--formatting)
   - [`eslint.config.mjs`](#eslintconfigmjs)
   - [`prettier.config.mjs`](#prettierconfigmjs)
@@ -24,7 +24,7 @@ This document describes all code quality configuration files in the project and 
   - [`.editorconfig`](#editorconfig)
   - [`.gitattributes`](#gitattributes)
 - [IDE Integration](#ide-integration)
-- [⛓️ Git Hooks (`.husky/`) Workflow](#️-git-hooks-husky-workflow)
+- [Git Hooks (`.husky/`) Workflow](#git-hooks-husky-workflow)
   - [`.husky/pre-commit`](#huskypre-commit)
   - [`.husky/commit-msg`](#huskycommit-msg)
   - [`.husky/prepare-commit-msg`](#huskyprepare-commit-msg)
@@ -48,7 +48,7 @@ Code quality tools enforce consistent standards, catch errors early, and maintai
 | Bun Test     | `bunfig.toml`         | Unit tests           | Commit, CI/CD       |
 | Husky        | `.husky/`             | Git hooks            | Commit, push        |
 
-### 🏃 Quality Check Commands
+### Quality Check Commands
 
 These scripts offer granular control over local quality checks:
 
@@ -158,7 +158,7 @@ The project uses Bun's built-in test runner for unit testing utility functions. 
 
 **Running Tests**:
 
-```bash
+```shell
 # Run unit tests (bunfig.toml sets root = "tests/unit", so just "bun test" works)
 bun test
 ```
@@ -246,7 +246,7 @@ ShellCheck runs as part of the main `bun lint` command alongside TypeScript and 
 
 Code quality tools integrate with IDEs through workspace settings and extensions. For detailed editor setup and recommended extensions, see [Editor Integration](../docs/development.md#code-quality) in the development documentation.
 
-## ⛓️ Git Hooks (`.husky/`) Workflow
+## Git Hooks (`.husky/`) Workflow
 
 Husky enforces project quality gates at key stages of the Git workflow. These hooks work together to maintain code quality, enforce commit standards, and automate versioning.
 

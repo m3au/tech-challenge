@@ -33,18 +33,15 @@ Playwright E2E test automation with BDD.
 
 ## Table of Contents <!-- omit from toc -->
 
-- [About](#about)
-- [Test Reports](#test-reports)
-- [Documentation](#documentation)
-- [Project Structure](#project-structure)
-- [Quick Setup](#quick-setup)
-- [Architecture \& Patterns](#architecture--patterns)
-  - [Page Object Model](#page-object-model)
-  - [World](#world)
-  - [Data Layer](#data-layer)
-  - [BDD with Gherkin](#bdd-with-gherkin)
-- [AI Assistance](#ai-assistance)
-- [Code Quality](#code-quality)
+- [🚀 Playwright E2E Stack with TypeScript, BDD, and AI-Assistance](#-playwright-e2e-stack-with-typescript-bdd-and-ai-assistance)
+  - [About](#about)
+  - [Test Reports](#test-reports)
+  - [Documentation](#documentation)
+  - [Project Structure](#project-structure)
+  - [Quick Setup](#quick-setup)
+  - [Architecture \& Patterns](#architecture--patterns)
+  - [AI Assistance](#ai-assistance)
+  - [Code Quality](#code-quality)
 
 ---
 
@@ -52,11 +49,11 @@ Playwright E2E test automation with BDD.
 
 This project implements a complete Playwright E2E test automation framework with:
 
+- **AI-Assisted Development**: Optimized for **Cursor IDE** with custom rules to enforce project conventions
 - **Behavior-Driven Development (BDD)**: Utilizes Gherkin and `playwright-bdd` for clear, collaborative feature development
 - **Decorated Page Object Model (POM)**: Eliminates separate step files by using **TypeScript decorators** (`@Given`, `@When`, `@Then`) directly on POM methods
 - **TypeScript**: Full type safety with strict mode enabled
 - **High-Speed Runtime**: Leverages **Bun** as both package manager and runtime for blazing-fast execution
-- **100% Code Coverage**: Guaranteed for all utility functions via **Bun's built-in test runner**
 - **Accessibility Testing**: Axe-core integration for automated WCAG compliance audits
 - **Performance Testing**: Lighthouse integration for Core Web Vitals and performance audits
 - **Interactive HTML Reports**: Automatically published to a dedicated **GitHub Pages dashboard** (including traces and media)
@@ -65,7 +62,6 @@ This project implements a complete Playwright E2E test automation framework with
 - **CI/CD**: GitHub Actions workflows with automated test execution and report publishing
 - **Dependabot**: Automated dependency updates with strict version pinning
 - **Local Testing**: Act integration for testing GitHub Actions workflows locally before pushing
-- **AI-Assisted Development**: Optimized for **Cursor IDE** with custom rules to enforce project conventions
 
 ---
 
@@ -108,8 +104,9 @@ tech-challenge/
 │   │   ├── unit-tests.yml     # Unit tests workflow
 │   │   ├── test.yml           # E2E tests workflow
 │   │   ├── lighthouse.yml     # Lighthouse audit workflow
-│   │   └── axe.yml            # Axe audit workflow
-│   ├── dependabot.yml         # Dependabot dependency updates
+│   │   ├── axe.yml            # Axe audit workflow
+│   │   └── dependabot.yml     # Dependabot workflow (pins versions on PRs)
+│   ├── dependabot.yml         # Dependabot configuration (dependency updates)
 │   └── templates/             # Report templates (HTML)
 ├── .husky/                    # Git hooks (pre-commit, commit-msg, prepare-commit-msg, pre-push)
 ├── **tests/**                 # All test suites
@@ -122,9 +119,6 @@ tech-challenge/
 │   │   └── **world.ts**       # Playwright fixtures and test setup
 │   ├── utils/                 # Shared utility functions
 │   ├── unit/                  # Unit tests (100% coverage)
-│   │   ├── format.test.ts     # Format utility tests
-│   │   ├── random.test.ts     # Random utility tests
-│   │   └── locators.test.ts   # Locator utility tests
 │   └── audit/                 # Audit tests (axe, lighthouse)
 ├── **scripts/**               # Utility scripts
 │   ├── bump-version.mjs       # Automatic version bumping
@@ -151,9 +145,9 @@ tech-challenge/
 ├── .cursorignore              # Cursor IDE ignore patterns
 ├── .nvmrc                     # Node version manager version
 ├── .npmrc                     # npm configuration
+├── .env                       # Environment variables (local, gitignored)
 ├── .env.example               # Environment variables template
 ├── .env.production            # Production environment variables template
-├── .env                       # Environment variables (local, gitignored)
 ├── LICENSE                    # License file
 └── README.md                  # This file
 ```
@@ -164,15 +158,14 @@ tech-challenge/
 
 **Install:**
 
-```bash
+```shell
 bun install
 ```
 
 **Configure:**
 
-Copy [`.env.example`](.env.example) to `.env` and customize the configuration:
-
-```bash
+```shell
+# Copy .env.example to .env and customize the configuration
 cp .env.example .env
 ```
 
@@ -182,7 +175,7 @@ See [Development Guide](./docs/development.md#environment-configuration) for com
 
 **Run:**
 
-```bash
+```shell
 bun run          # List all available project commands
 bun run test     # Run E2E tests (includes pretest step)
 bun test         # Run unit tests with coverage enabled
@@ -197,9 +190,9 @@ bun lighthouse   # Run Lighthouse performance tests
 
 **Code Quality:**
 
-```bash
-bun lint              # Run all linting: TypeScript → ESLint → ShellCheck (with progress)
-bun lint:fix          # Fix ESLint errors automatically (TS, MJS, JSON, HTML, Markdown, YAML)
+```shell
+bun lint              # Run all linting: TypeScript → ESLint → ShellCheck
+bun lint:fix          # Fix ESLint errors (TS, MJS, JSON, HTML, Markdown, YAML)
 bun lint:typescript   # TypeScript type checking only
 bun lint:eslint       # ESLint only (TS, MJS, JSON, HTML, Markdown, YAML, .mdc)
 bun lint:markdown     # Markdown linting only
@@ -210,30 +203,21 @@ bun lint:shellcheck   # ShellCheck only (Husky git hooks)
 
 Test GitHub Actions workflows locally using the Makefile (requires Docker and act):
 
-```bash
+```shell
 make test        # Test E2E tests workflow locally
 make lighthouse  # Test Lighthouse audit workflow locally
 make axe         # Test Axe audit workflow locally
 make ci          # Test main CI workflow locally
-make publish     # Test publish reports workflow locally
 make help        # Show all available workflow test targets
 ```
 
 ## Architecture & Patterns
 
-### Page Object Model
-
 **Page Object Model (POM):** Located in `tests/e2e/poms/`. This framework eliminates separate step definition files by applying **BDD decorators** (`@Given`, `@When`, `@Then`) directly to the Page Object methods. POMs are automatically registered as fixtures using the `@Fixture` decorator.
 
-### World
+**World:** Custom Fixture (`tests/e2e/world.ts`) is the central hub. It extends the standard `playwright-bdd` test, registers all POMs (CableConfiguratorPage, CableSelectorPopup, CookieBanner, ProductDetailPage) using the custom `@Fixture` decorator, provides a world fixture containing the Playwright page and environment data, and exports the core BDD decorators (`@Fixture`, `@Given`, `@When`, `@Then`) and Playwright types (`expect`, `Locator`, `Page`). The custom `@Step` decorator for internal step definitions is defined in `tests/utils/decorators.ts` and re-exported from `@world`.
 
-**Custom Fixture (`tests/e2e/world.ts`):** This file is the central hub. It extends the standard `playwright-bdd` test, registers all POMs (CableConfiguratorPage, CableSelectorPopup, CookieBanner, ProductDetailPage) using the custom `@Fixture` decorator, provides a world fixture containing the Playwright page and environment data, and exports the core BDD decorators (`@Fixture`, `@Given`, `@When`, `@Then`) and Playwright types (`expect`, `Locator`, `Page`). The custom `@Step` decorator for internal step definitions is defined in `tests/utils/decorators.ts` and re-exported from `@world`.
-
-### Data Layer
-
-**Data Layer (`tests/e2e/data/config.ts`):** Loads environment-specific data for test execution.
-
-### BDD with Gherkin
+**Data Layer:** `tests/e2e/data/config.ts` loads environment-specific data for test execution.
 
 **BDD with Gherkin:** Feature files are located in `tests/e2e/features/`. Test files are automatically generated to `test-output/bdd-gen/`.
 

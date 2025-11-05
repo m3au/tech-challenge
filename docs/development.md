@@ -35,7 +35,7 @@ This guide provides setup instructions and development guidelines for the projec
   - [Test Configuration](#test-configuration)
   - [Environment Configuration](#environment-configuration)
     - [CI vs Local Configuration Differences](#ci-vs-local-configuration-differences)
-- [Resources](#resources)
+- [Resources](#resources-)
 
 ---
 
@@ -49,7 +49,7 @@ This guide provides setup instructions and development guidelines for the projec
 
 ### Installation
 
-```bash
+```shell
 # Clone the repository
 git clone https://github.com/m3au/tech-challenge.git
 cd tech-challenge
@@ -91,7 +91,7 @@ Unit tests cover all utility modules (attachments, browser-project, bug-reporter
 
 Test GitHub Actions workflows locally using [act](https://github.com/nektos/act):
 
-```bash
+```shell
 # List all available workflows (use act directly)
 act -l
 
@@ -153,7 +153,7 @@ These settings ensure code quality is maintained automatically as you type and s
 
 **Scripts:**
 
-```bash
+```shell
 # Run all linters (TypeScript → ESLint → ShellCheck with progress)
 bun lint
 
@@ -175,7 +175,7 @@ For detailed configuration, see [Code Quality Files Reference](./code-quality.md
 
 **Bypassing hooks temporarily:**
 
-```bash
+```shell
 git commit --no-verify
 ```
 
@@ -224,7 +224,7 @@ For a complete implementation example, refer to `tests/e2e/poms/pages/configurat
 
 ### Debugging Tests
 
-```bash
+```shell
 # Run with Playwright Inspector
 bun debug
 
@@ -261,7 +261,7 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 
 ### Examples
 
-```bash
+```shell
 feat(playwright): add manufacturer selection step
 fix(tests): resolve timeout in basket validation
 docs: update contributing guide
@@ -294,13 +294,13 @@ Add dependencies using standard Bun commands (`bun add <package-name>` or `bun a
 
 **Important**: Always run `bun pin` after adding any dependency to pin versions to exact versions (no `^` or `~`).
 
-```bash
+```shell
 bun pin
 ```
 
 ### Updating Dependencies
 
-```bash
+```shell
 # Update all dependencies
 bun bump
 
@@ -375,7 +375,7 @@ The `.env` file supports the following configuration options:
 
 | **Setting**   | **Local** (`.env.example`) | **CI** (`.env.production`) | **Notes**                                       |
 | :------------ | :------------------------- | :------------------------- | :---------------------------------------------- |
-| `WORKERS`     | `50%`                      | `50%`                      | CI uses sharding (`--shard=1/2`, `--shard=2/2`) |
+| `WORKERS`     | `10`                       | `50%`                      | CI uses sharding (`--shard=1/2`, `--shard=2/2`) |
 | `REPEAT_EACH` | `0`                        | `30`                       | CI repeats tests 30 times for reliability       |
 | `RETRIES`     | `1`                        | `0`                        | CI uses REPEAT_EACH instead of retries          |
 | `TIMEOUT`     | `40000`                    | `45000`                    | CI has longer timeout for network delays        |
@@ -405,7 +405,7 @@ Workflows can run independently or be orchestrated together via the main CI work
 - Weekly updates scheduled for Mondays at 9:00 AM
 - Automatically creates PRs with pinned versions
 
-## Resources
+## Resources 🔗
 
 **Testing:**
 
@@ -432,8 +432,8 @@ Workflows can run independently or be orchestrated together via the main CI work
 
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
 - [GitHub Pages Documentation](https://docs.github.com/en/pages)
-- [act Documentation](https://github.com/nektos/act) - Local GitHub Actions workflow testing
-- [Docker Documentation](https://docs.docker.com/) - Container platform for act
+- [act Documentation](https://github.com/nektos/act)
+- [Docker Documentation](https://docs.docker.com/)
 
 **BDD & Testing Patterns:**
 

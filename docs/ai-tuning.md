@@ -7,12 +7,12 @@ This document explains Cursor IDE AI configuration including global hooks, MCP i
 ## Table of Contents <!-- omit from toc -->
 
 - [Overview](#overview)
-- [⚠️ Global Cursor Hooks (Manual Installation Required)](#️-global-cursor-hooks-manual-installation-required)
+- [Global Cursor Hooks (Manual Installation Required)](#global-cursor-hooks-manual-installation-required)
   - [Installation Steps](#installation-steps)
   - [`block-dangerous-commands.sh`](#block-dangerous-commandssh)
   - [`format-files.sh`](#format-filessh)
 - [MCP Integrations](#mcp-integrations)
-- [📜 AI Agent Rules Reference](#-ai-agent-rules-reference)
+- [AI Agent Rules Reference](#ai-agent-rules-reference)
   - [Always Applied Rules](#always-applied-rules)
   - [Context-Specific Rules](#context-specific-rules)
 
@@ -32,7 +32,7 @@ This project uses Cursor IDE rules (`.cursor/rules/*.mdc`) to guide AI assistant
 
 ---
 
-## ⚠️ Global Cursor Hooks (Manual Installation Required)
+## Global Cursor Hooks (Manual Installation Required)
 
 Custom shell scripts that intercept and process AI assistant commands **globally** across all projects using Cursor IDE.
 
@@ -40,7 +40,7 @@ Custom shell scripts that intercept and process AI assistant commands **globally
 
 ### Installation Steps
 
-```bash
+```shell
 mkdir -p ~/.cursor/hooks/
 cp .cursor/hooks/*.sh ~/.cursor/hooks/
 chmod +x ~/.cursor/hooks/*.sh
@@ -75,7 +75,7 @@ Extends AI assistant capabilities beyond codebase with external tool integration
 
 ---
 
-## 📜 AI Agent Rules Reference
+## AI Agent Rules Reference
 
 These rules guide the AI assistant's behavior based on the file context. Rule files are located in [`.cursor/rules/`](../.cursor/rules/).
 
