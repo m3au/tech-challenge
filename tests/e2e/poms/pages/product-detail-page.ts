@@ -14,7 +14,9 @@ export class ProductDetailPage {
       name: 'ADD TO BASKET',
     });
     // Use a more flexible locator that can match text even if split across elements
-    this.basketNotificationLocator = this.page.locator('text=/is now in the shopping basket/i');
+    this.basketNotificationLocator = this.page
+      .locator('text=/is now in the shopping basket/i')
+      .first();
   }
 
   @Then('I see the product page')
@@ -45,10 +47,13 @@ export class ProductDetailPage {
   /**
    * Waits for basket notification to appear after adding product.
    * Notification appears after AJAX request completes and frontend updates DOM.
+   * We verify it immediately when it appears, before it auto-dismisses.
    */
   @Step
   private async iWaitForBasketNotificationToAppear(): Promise<void> {
     await this.iWaitForBasketAjaxResponse();
+    // Verify notification appears immediately after AJAX, before it auto-dismisses
+    await expect(this.basketNotificationLocator).toBeVisible({ timeout: 5000 });
     await this.iWaitForBasketNotificationDOMUpdate();
   }
 
@@ -86,19 +91,12 @@ export class ProductDetailPage {
    */
   @Step
   private async iWaitForBasketNotificationDOMUpdate(): Promise<void> {
-    // Wait for element to be attached first, then visible (more flexible than waiting for visible only)
-    await this.basketNotificationLocator
-      .waitFor({ state: 'attached', timeout: 10_000 })
-      .catch(() => {
-        // Element may not be attached yet
-      });
-
     await waitForDOMStabilization(this.page);
   }
 
   @Step
   private async iSeeTheBasketNotificationPopup(): Promise<void> {
-    // Already waited for it to appear, so this should be quick
-    await expect(this.basketNotificationLocator).toBeVisible({ timeout: 10_000 });
+    // Notification was already verified in iWaitForBasketNotificationToAppear
+    // This step is now a no-op since we check it immediately when it appears
   }
 }

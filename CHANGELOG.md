@@ -1,5 +1,13 @@
 # Changelog
 
+## [🐛 Fix detected: 1.5.0 -> 1.5.1
+
+1.5.1] - 2025-11-05
+
+### Fixed
+
+- **ci**: correct GitHub Pages URL to tech-challenge
+
 ## [✨ Feature detected: 1.4.2 -> 1.5.0
 
 1.5.0] - 2025-11-05
