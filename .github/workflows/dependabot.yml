@@ -45,7 +45,7 @@ jobs:
         run: |
           git config --local user.name 'github-actions[bot]'
           git config --local user.email 'github-actions[bot]@users.noreply.github.com'
-          git add package.json
+          git add package.json bun.lock
           git commit --no-verify -m "chore(deps): pin dependency versions"
 
       - name: Push changes
