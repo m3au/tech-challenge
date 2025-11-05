@@ -101,7 +101,7 @@ playwright-pilot/
 ├── **.github/**               # GitHub configuration
 │   ├── **workflows/**         # CI/CD workflows (GitHub Actions)
 │   │   ├── ci.yml             # Main CI orchestrator workflow + report publishing
-│   │   ├── unit-tests.yml     # Unit tests workflow
+│   │   ├── preflight.yml      # Pre-flight checks (lint + unit tests)
 │   │   ├── test.yml           # E2E tests workflow
 │   │   ├── lighthouse.yml     # Lighthouse audit workflow
 │   │   ├── axe.yml            # Axe audit workflow
@@ -250,11 +250,11 @@ This project uses comprehensive code quality tooling:
 
 **Git Hook Actions:**
 
-- **Pre-commit**: Runs **Unit Tests**, then executes **lint-staged** (ESLint, Prettier, ShellCheck) on only the staged files for speed
+- **Pre-commit**: Runs **unit tests**, then executes **lint-staged** (ESLint, Prettier, ShellCheck) on only the staged files for speed
 - **Commit-msg**: Validates conventional commit format
 - **Prepare-commit-msg**: Automatically calculates the next **Semantic Version** and updates the `CHANGELOG.md` based on your commit message
 - **Pre-push**: TypeScript type checking
-- **CI/CD**: Runs all quality gates automatically (unit tests run first, before other tests)
+- **CI/CD**: Runs all quality gates automatically (pre-flight checks run first: lint + unit tests, then E2E/audits)
 
 **Editor Integration:**
 

@@ -85,7 +85,7 @@ Unit tests use Bun's built-in test runner and achieve 100% code coverage for uti
 Unit tests cover all utility modules (attachments, browser-project, bug-reporter, decorators, environment, format, locators, network, pagination, random) and all scripts (bump-version, changelog, lint, pin-versions).
 
 - Unit tests run automatically before every commit (pre-commit hook)
-- Unit tests run first in CI/CD before other tests (E2E, Lighthouse, Axe)
+- Pre-flight checks (lint + unit tests) run first in CI/CD before other tests (E2E, Lighthouse, Axe)
 
 ### Local Workflow Testing
 
@@ -388,7 +388,7 @@ Additionally, CI automatically sets `forbidOnly: true` in `playwright.config.ts`
 The project uses modular GitHub Actions workflows:
 
 - **`ci.yml`**: Main orchestrator workflow that calls other workflows and publishes reports to GitHub Pages
-- **`unit-tests.yml`**: Unit tests workflow (runs before other workflows)
+- **`preflight.yml`**: Pre-flight checks workflow (lint + unit tests, runs before other workflows)
 - **`test.yml`**: E2E tests workflow (sharded for parallel execution)
 - **`lighthouse.yml`**: Lighthouse performance audit workflow
 - **`axe.yml`**: Axe accessibility audit workflow

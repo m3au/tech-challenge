@@ -8,6 +8,7 @@
 // eslint-disable-next-line unicorn/import-style -- Required for __dirname pattern with ES modules
 import { dirname, join } from 'node:path';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { execSync } from 'node:child_process';
 
 import { fileURLToPath } from 'node:url';
 
@@ -181,6 +182,18 @@ function main() {
     }
 
     console.log(`✅ ${result.message}`);
+
+    // Format changelog with Prettier (using absolute path to avoid PATH issues)
+    try {
+      const prettierBin = join(__dirname, '..', 'node_modules', '.bin', 'prettier');
+      // eslint-disable-next-line sonarjs/os-command -- Safe: using local prettier binary with fixed args
+      execSync(`"${prettierBin}" --write CHANGELOG.md`, {
+        cwd: join(__dirname, '..'),
+        stdio: 'ignore',
+      });
+    } catch {
+      // Prettier formatting failed, but changelog is still updated
+    }
   } catch (error) {
     console.error('⚠️  Error updating changelog:', error.message);
     process.exit(0);

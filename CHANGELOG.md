@@ -2,10 +2,13 @@
 
 ## [1.5.6] - 2025-11-05
 
+### Refactored
+
+- **ci**: rename unit tests to Pre-flight Checks
 ### Added
+
 - **ci**: add descriptive annotations for each test workflow
 - **ci**: add clickable report links in job summary
-
 - **ci**: add automatic git tagging and release management
 
 ### Fixed
