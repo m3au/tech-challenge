@@ -8,6 +8,13 @@ if ! bun test; then
 fi
 echo "✅ Unit tests passed!"
 
+# Update coverage badge in README
+echo "📊 Updating coverage badge..."
+node scripts/update-coverage-badge.mjs
+if [ -f README.md ]; then
+  git add README.md
+fi
+
 # Run lint-staged with better error handling
 echo "🔍 Running pre-commit checks..."
 if ! bunx lint-staged; then

@@ -34,7 +34,6 @@ jobs:
       - name: Setup environment
         run: |
           cp .env.production .env
-          echo "BASE_URL=${{ secrets.BASE_URL }}" >> .env
 
       - name: Run Lighthouse CI
         run: bun run lighthouse

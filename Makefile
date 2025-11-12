@@ -31,7 +31,7 @@ help:
 	@echo "Requirements:"
 	@echo "  • Docker must be running (act uses Docker containers to simulate GitHub Actions)"
 	@echo "  • act must be installed (brew install act or see https://github.com/nektos/act)"
-	@echo "  • .env file with BASE_URL configured (copy .env.example to .env)"
+	@echo "  • .env file with BASE_URL_<CHALLENGE> variables configured (copy .env.example to .env)"
 	@echo "  • .actrc file for platform configuration"
 	@echo ""
 	@echo "Tip: Use 'make <target>' to run a specific workflow locally"

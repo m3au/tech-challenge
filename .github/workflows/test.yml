@@ -38,7 +38,6 @@ jobs:
       - name: Setup environment
         run: |
           cp .env.production .env
-          echo "BASE_URL=${{ secrets.BASE_URL }}" >> .env
 
       - name: Run tests (shard ${{ matrix.shard }}/2)
         run: bun run test -- --shard=${{ matrix.shard }}/2

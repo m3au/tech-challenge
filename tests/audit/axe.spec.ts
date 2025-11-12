@@ -19,8 +19,8 @@ interface AxeViolation {
   nodes?: AxeViolationNode[];
 }
 
-const baseUrl = environment('BASE_URL');
-const maxViolations = +environment('AXE_MAX_VIOLATIONS');
+const baseUrl = environment('BASE_URL')!;
+const maxViolations = +environment('AXE_MAX_VIOLATIONS')!;
 const outputDirectory = path.join(process.cwd(), 'test-output');
 
 test.describe('Accessibility Tests', () => {

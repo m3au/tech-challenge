@@ -7,11 +7,11 @@ import { expect, test } from '@playwright/test';
 import lighthouse from 'lighthouse';
 import path from 'node:path';
 
-const baseUrl = environment('BASE_URL');
-const performanceThreshold = +environment('LIGHTHOUSE_PERFORMANCE');
-const accessibilityThreshold = +environment('LIGHTHOUSE_ACCESSIBILITY');
-const bestPracticesThreshold = +environment('LIGHTHOUSE_BEST_PRACTICES');
-const seoThreshold = +environment('LIGHTHOUSE_SEO');
+const baseUrl = environment('BASE_URL')!;
+const performanceThreshold = +environment('LIGHTHOUSE_PERFORMANCE')!;
+const accessibilityThreshold = +environment('LIGHTHOUSE_ACCESSIBILITY')!;
+const bestPracticesThreshold = +environment('LIGHTHOUSE_BEST_PRACTICES')!;
+const seoThreshold = +environment('LIGHTHOUSE_SEO')!;
 
 const outputDirectory = path.join(process.cwd(), 'test-output');
 
