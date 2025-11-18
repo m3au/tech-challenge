@@ -6,12 +6,8 @@ export function environment(name: string): string | undefined {
   return value === '' ? undefined : value;
 }
 
-export interface AuditTarget {
-  name: string;
-  url: string;
-}
-
 export interface EnvironmentConfig {
+  baseUrl: string;
   timeout: number;
   expectTimeout: number;
   workers: number | string;
@@ -68,6 +64,7 @@ export interface DataConfig {
 
 export function getEnvironment(): DataConfig & { environment: EnvironmentConfig } {
   const config: EnvironmentConfig = {
+    baseUrl: environment('BASE_URL')!,
     timeout: +environment('TIMEOUT')!,
     expectTimeout: +environment('EXPECT_TIMEOUT')!,
     workers: environment('WORKERS')!,

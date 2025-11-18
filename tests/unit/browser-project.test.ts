@@ -42,6 +42,13 @@ describe('browser-project', () => {
     process.env['DEVICE_SCALE_FACTOR'] = '1';
     process.env['ACTION_TIMEOUT'] = '0';
     process.env['NAVIGATION_TIMEOUT'] = '0';
+    process.env['USER_AGENT'] = '';
+    process.env['LOCALE'] = '';
+    process.env['TIMEZONE_ID'] = '';
+    process.env['GEOLOCATION'] = '';
+    process.env['PERMISSIONS'] = '';
+    process.env['BROWSER_CHANNEL'] = '';
+    process.env['BROWSER_ARGS'] = '';
   });
 
   afterEach(() => {

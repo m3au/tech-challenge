@@ -21,6 +21,7 @@
 - **ci**: add automatic git tagging and release management
 
 ### Fixed
+- **tests**: set required environment variables in unit tests
 
 - **automationexercise**: resolve linting errors in POM pages
 - **ci**: add Dependabot check to child workflows

@@ -50,6 +50,7 @@ describe('env', () => {
     test('should return environment config with all required variables', () => {
       const originalEnvironment = { ...process.env };
       try {
+        process.env['BASE_URL'] = 'https://example.com';
         process.env['BASE_URL_AXE_W3C_BAD'] = 'https://bad.example.com';
         process.env['BASE_URL_AXE_W3C_AFTER'] = 'https://after.example.com';
         process.env['BASE_URL_AXE_DEQUE_MARS'] = 'https://mars.example.com';
@@ -90,6 +91,17 @@ describe('env', () => {
         process.env['LIGHTHOUSE_SEO'] = '0.8';
         process.env['LIGHTHOUSE_PWA'] = '0.75';
         process.env['AXE_MAX_VIOLATIONS'] = '10';
+        process.env['USER_AGENT'] = '';
+        process.env['LOCALE'] = '';
+        process.env['TIMEZONE_ID'] = '';
+        process.env['GEOLOCATION'] = '';
+        process.env['PERMISSIONS'] = '';
+        process.env['BROWSER_CHANNEL'] = '';
+        process.env['BROWSER_ARGS'] = '';
+        process.env['COLOR_SCHEME'] = '';
+        process.env['PROXY_SERVER'] = '';
+        process.env['VIDEO_SIZE'] = '';
+        process.env['VIDEO_PATH'] = '';
 
         const result = getEnvironment();
 
@@ -145,6 +157,7 @@ describe('env', () => {
     test('should handle optional variables as undefined', () => {
       const originalEnvironment = { ...process.env };
       try {
+        process.env['BASE_URL'] = 'https://example.com';
         process.env['BASE_URL_AXE_W3C_BAD'] = 'https://bad.example.com';
         process.env['BASE_URL_AXE_W3C_AFTER'] = 'https://after.example.com';
         process.env['BASE_URL_AXE_DEQUE_MARS'] = 'https://mars.example.com';
@@ -185,6 +198,17 @@ describe('env', () => {
         process.env['LIGHTHOUSE_SEO'] = '0';
         process.env['LIGHTHOUSE_PWA'] = '0';
         process.env['AXE_MAX_VIOLATIONS'] = '0';
+        process.env['USER_AGENT'] = '';
+        process.env['LOCALE'] = '';
+        process.env['TIMEZONE_ID'] = '';
+        process.env['GEOLOCATION'] = '';
+        process.env['PERMISSIONS'] = '';
+        process.env['BROWSER_CHANNEL'] = '';
+        process.env['BROWSER_ARGS'] = '';
+        process.env['COLOR_SCHEME'] = '';
+        process.env['PROXY_SERVER'] = '';
+        process.env['VIDEO_SIZE'] = '';
+        process.env['VIDEO_PATH'] = '';
 
         const result = getEnvironment();
 
