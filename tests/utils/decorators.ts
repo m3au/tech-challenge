@@ -1,6 +1,7 @@
+import { test as base } from '@playwright/test';
+
 import { addTestStep, formatParameterValue, toTitleCase } from '@utils';
 
-import { test as base } from '@playwright/test';
 
 // Mutable test object for testing purposes
 // Allows tests to replace the test object to mock step/info calls

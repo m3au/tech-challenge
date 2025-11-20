@@ -1,7 +1,7 @@
-/* eslint-disable playwright/expect-expect -- Assertions are in expectPortTimeoutWithTiming helper */
 import * as net from 'node:net';
 
 import { describe, expect, mock, test } from 'bun:test';
+
 import { waitForAjaxResponse, waitForAjaxResponseFromHost, waitForPort } from '@utils';
 
 function listenOnRandomPort(server: net.Server): Promise<number> {
@@ -253,6 +253,51 @@ describe('network', () => {
         'api',
       );
       expect(result).toBeUndefined();
+    });
+
+    test('should pass options to waitForAjaxResponse', async () => {
+      const mockRequest = { method: () => 'POST' };
+      const mockResponse = {
+        url: () => 'https://example.com/api/data',
+        request: () => mockRequest,
+      } as any;
+
+      const mockPage = {
+        waitForResponse: mock(async (predicate: any) => {
+          const matches = predicate(mockResponse);
+          return matches ? mockResponse : undefined;
+        }),
+      };
+
+      const result = await waitForAjaxResponseFromHost(
+        mockPage as any,
+        'https://example.com',
+        'data',
+        { timeout: 5000, method: 'POST' },
+      );
+      expect(result).toBe(mockResponse);
+    });
+
+    test('should handle URL with port in baseUrl', async () => {
+      const mockRequest = { method: () => 'GET' };
+      const mockResponse = {
+        url: () => 'https://example.com:8080/api/test',
+        request: () => mockRequest,
+      } as any;
+
+      const mockPage = {
+        waitForResponse: mock(async (predicate: any) => {
+          const matches = predicate(mockResponse);
+          return matches ? mockResponse : undefined;
+        }),
+      };
+
+      const result = await waitForAjaxResponseFromHost(
+        mockPage as any,
+        'https://example.com:8080',
+        'test',
+      );
+      expect(result).toBe(mockResponse);
     });
   });
 });

@@ -1,20 +1,31 @@
-import * as chromeLauncher from 'chrome-launcher';
 import * as fs from 'node:fs';
+import path from 'node:path';
+
+import { expect, test } from '@playwright/test';
+import * as chromeLauncher from 'chrome-launcher';
+import lighthouse from 'lighthouse';
 
 import { environment, waitForPort } from '@utils';
-import { expect, test } from '@playwright/test';
 
-import lighthouse from 'lighthouse';
-import path from 'node:path';
+import { getSharedStyles, themes } from '../../scripts/template-utils';
 
 interface LighthouseTarget {
   name: string;
   url: string;
+  description?: string;
 }
 
 const lighthouseTargets: LighthouseTarget[] = [
-  { name: 'polymer-shop', url: environment('BASE_URL_LIGHTHOUSE_POLYMER')! },
-  { name: 'w3c-bad', url: environment('BASE_URL_LIGHTHOUSE_W3C_BAD')! },
+  {
+    name: 'polymer-shop',
+    url: environment('BASE_URL_LIGHTHOUSE_POLYMER')!,
+    description: 'Polymer Shop Demo – E-commerce performance testing site',
+  },
+  {
+    name: 'w3c-bad',
+    url: environment('BASE_URL_LIGHTHOUSE_W3C_BAD')!,
+    description: 'W3C Before Fix Demo – Demonstrates accessibility issues that need fixing',
+  },
 ];
 
 const performanceThreshold = +environment('LIGHTHOUSE_PERFORMANCE')!;
@@ -38,52 +49,45 @@ function sanitizeName(name: string): string {
 
 function writeSummary(): void {
   const summaryPath = path.join(lighthouseDirectory, 'index.html');
+  const templatePath = path.join(process.cwd(), '.github', 'templates', 'lighthouse-summary.html');
+
+  if (!fs.existsSync(templatePath)) {
+    throw new Error(`Template not found: ${templatePath}`);
+  }
+
+  let html = fs.readFileSync(templatePath, 'utf8');
+
   const listItems = processedTargets
-    .map(
-      (target) =>
-        `<li><a href="./${target.directory}/index.html">${target.name}</a><br /><small>${target.url}</small></li>`,
-    )
+    .map((target) => {
+      const targetInfo = lighthouseTargets.find((t) => t.name === target.name);
+      const description = targetInfo?.description
+        ? `<div class="target-description">${targetInfo.description} – <a href="${target.url}" class="target-url" target="_blank" rel="noopener noreferrer">${target.url}</a></div>`
+        : `<div class="target-description"><a href="${target.url}" class="target-url" target="_blank" rel="noopener noreferrer">${target.url}</a></div>`;
+      return `<li>
+        <a href="./${target.directory}/index.html" class="target-link">${target.name}</a>
+        ${description}
+      </li>`;
+    })
     .join('\n');
 
-  const summaryHtml = `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Lighthouse Performance Audits</title>
-    <style>
-      body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #020617; color: #e2e8f0; margin: 0; padding: 3rem 1.5rem; }
-      .container { max-width: 960px; margin: 0 auto; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(18px); border-radius: 16px; padding: 2.5rem; box-shadow: 0 25px 50px -12px rgba(2, 6, 23, 0.7); }
-      h1 { margin-top: 0; font-size: 2rem; }
-      p { color: #94a3b8; line-height: 1.6; }
-      ul { list-style: none; margin: 2rem 0 0; padding: 0; display: grid; gap: 1rem; }
-      li { background: rgba(30, 41, 59, 0.9); border-radius: 12px; padding: 1rem 1.25rem; border: 1px solid rgba(148, 163, 184, 0.2); transition: transform 0.2s ease, border-color 0.2s ease; }
-      li:hover { transform: translateY(-3px); border-color: #f97316; }
-      a { color: #fb923c; text-decoration: none; font-weight: 600; }
-      a:hover { text-decoration: underline; }
-      small { color: #64748b; }
-      .note { margin-top: 2rem; font-size: 0.875rem; color: #cbd5f5; }
-      code { background: rgba(30, 41, 59, 0.7); padding: 0.1rem 0.4rem; border-radius: 4px; }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>🗼 Lighthouse Performance Audits</h1>
+  const descriptionHtml = `
       <p>
         These runs enforce baseline thresholds (performance ≥ <code>${performanceThreshold}</code>,
         accessibility ≥ <code>${accessibilityThreshold}</code>, best-practices ≥ <code>${bestPracticesThreshold}</code>,
         SEO ≥ <code>${seoThreshold}</code>). If a regression drops below these targets the step fails,
         but otherwise the workflow continues and publishes the reports.
-      </p>
-      <ul>
-        ${listItems}
-      </ul>
-      <p class="note">Each link opens the full Lighthouse HTML report for the given target.</p>
-    </div>
-  </body>
-</html>`;
+      </p>`;
 
-  fs.writeFileSync(summaryPath, summaryHtml);
+  const notesHtml = `<p class="note">Each link opens the full Lighthouse HTML report for the given target.</p>`;
+
+  // Replace placeholders
+  const sharedStyles = getSharedStyles(themes.lighthouse);
+  html = html.replaceAll('{{SHARED_STYLES}}', sharedStyles);
+  html = html.replaceAll('{{DESCRIPTION}}', descriptionHtml);
+  html = html.replaceAll('{{LIST_ITEMS}}', listItems);
+  html = html.replaceAll('{{NOTES}}', notesHtml);
+
+  fs.writeFileSync(summaryPath, html);
 }
 
 for (const target of lighthouseTargets) {

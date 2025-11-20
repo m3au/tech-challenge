@@ -1,7 +1,7 @@
+import { test as baseTest } from '@playwright/test';
 import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test';
 
 import { attachFileFromStep } from '@utils';
-import { test as baseTest } from '@playwright/test';
 
 type AttachedFile = {
   name: string;

@@ -1,5 +1,6 @@
 import type { Page, TestInfo } from '@playwright/test';
 import { test as bddTest } from 'playwright-bdd';
+
 import {
   appendBugReport,
   clearTestContext,
@@ -43,8 +44,10 @@ export const test = bddTest.extend<{
     await use(world);
 
     // Capture test failure and write to BUGS.json after test completes
-    // Check for error directly as testInfo.status might not be finalized during cleanup
-    if (testInfo.error) {
+    // Check both error and status to catch failures reliably during fixture cleanup
+    // In Playwright, testInfo.error might not always be set, but status should be more reliable
+    const hasError = testInfo.error || testInfo.status === 'failed';
+    if (hasError) {
       const bugReport = createBugReport(testInfo, testContext);
 
       await appendBugReport(bugReport).catch((error) => {

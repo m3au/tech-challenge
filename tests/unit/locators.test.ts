@@ -1,6 +1,6 @@
-/* eslint-disable playwright/no-standalone-expect -- Bun test.each pattern not recognized by Playwright plugin */
 /* eslint-disable unicorn/no-null -- Testing null handling in utility function */
 import { describe, expect, mock, test } from 'bun:test';
+
 import { hasClass, isDisabled, isValidTextItem } from '@utils';
 
 describe('locators', () => {
@@ -21,6 +21,11 @@ describe('locators', () => {
 
     test('should return false when not visible', () => {
       expect(isValidTextItem('valid text', false)).toBe(false);
+    });
+
+    test('should handle default excludeTexts parameter', () => {
+      expect(isValidTextItem('valid text', true)).toBe(true);
+      expect(isValidTextItem('valid text', true, [])).toBe(true);
     });
 
     describe('excludeTexts', () => {
@@ -137,7 +142,6 @@ describe('locators', () => {
       const mockElement = {
         classList: { contains: () => false },
         hasAttribute: () => false,
-        // eslint-disable-next-line playwright/no-conditional-in-test -- testing conditional attribute logic
         getAttribute: (attribute: string) => (attribute === 'aria-disabled' ? 'true' : null),
       };
       const mockLocator = {

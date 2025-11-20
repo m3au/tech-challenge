@@ -1,9 +1,10 @@
-import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-describe('update-coverage-badge.mjs integration', () => {
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
+
+describe('update-coverage-badge.ts integration', () => {
   let temporaryDirectory: string;
   let originalCwd: string;
   let temporaryReadme: string;

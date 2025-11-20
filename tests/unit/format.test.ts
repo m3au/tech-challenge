@@ -1,5 +1,5 @@
-/* eslint-disable playwright/no-standalone-expect -- Bun test.each pattern not recognized by Playwright plugin */
 import { describe, expect, test } from 'bun:test';
+
 import { formatParameterValue, toTitleCase } from '@utils';
 
 describe('format', () => {

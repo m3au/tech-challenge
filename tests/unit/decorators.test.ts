@@ -6,10 +6,11 @@
  * register mock calls. These tests focus on observable behavior (return values, method execution)
  * rather than verifying internal function calls.
  */
-import { Step, getStepFunction, getTestObject, setTestObject } from '@utils';
+import { test as baseTest } from '@playwright/test';
 import { describe, expect, test } from 'bun:test';
 
-import { test as baseTest } from '@playwright/test';
+import { Step, getStepFunction, getTestObject, setTestObject } from '@utils';
+
 
 describe('decorators', () => {
   describe('test utilities', () => {
@@ -162,7 +163,6 @@ describe('decorators', () => {
           parameter1: string | null,
           parameter2: string | undefined,
         ): Promise<string> {
-          // eslint-disable-next-line playwright/no-conditional-in-test -- Nullish coalescing for default values, not test logic
           return `${parameter1 ?? 'null'}-${parameter2 ?? 'undefined'}`;
         }
       }
@@ -248,6 +248,47 @@ describe('decorators', () => {
       const result = await instance.complexMethod('test', 42, true, { key: 'value' });
 
       expect(result).toBe('test-42-true-{"key":"value"}');
+    });
+
+    test('should handle testInfo with testId when available', async () => {
+      const originalTest = getTestObject();
+      const mockTestId = 'test-123';
+      const mockTest = {
+        ...baseTest,
+        info: () => ({ testId: mockTestId }) as any,
+        step: baseTest.step,
+      } as unknown as typeof baseTest;
+      setTestObject(mockTest);
+
+      try {
+        class TestClass {
+          @Step
+          async testMethod(): Promise<string> {
+            return 'success';
+          }
+        }
+
+        const instance = new TestClass();
+        const result = await instance.testMethod();
+
+        expect(result).toBe('success');
+      } finally {
+        setTestObject(originalTest);
+      }
+    });
+
+    test('should format step title with single argument', async () => {
+      class TestClass {
+        @Step
+        async singleArgMethod(value: string): Promise<string> {
+          return value;
+        }
+      }
+
+      const instance = new TestClass();
+      const result = await instance.singleArgMethod('test');
+
+      expect(result).toBe('test');
     });
   });
 });

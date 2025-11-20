@@ -1,7 +1,17 @@
-import { calculateNewVersion, isBreakingChange, parseCommitType } from '@scripts/bump-version.mjs';
-import { describe, expect, test } from 'bun:test';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 
-describe('bump-version.mjs', () => {
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
+
+import {
+  calculateNewVersion,
+  isBreakingChange,
+  parseCommitType,
+  updatePackageVersion,
+} from '@scripts/bump-version.ts';
+
+describe('bump-version.ts', () => {
   const testVersion = '1.2.3';
 
   describe('version bumping logic', () => {
@@ -101,6 +111,72 @@ describe('bump-version.mjs', () => {
       expect(major).toBe(12);
       expect(minor).toBe(345);
       expect(patch).toBe(6789);
+    });
+  });
+
+  describe('invalid version format handling', () => {
+    test('returns undefined for version with wrong number of parts', () => {
+      const invalidVersion = '1.2';
+      const newVersion = calculateNewVersion(invalidVersion, 'feat: add feature');
+      expect(newVersion).toBeUndefined();
+    });
+
+    test('returns undefined for version with too many parts', () => {
+      // eslint-disable-next-line sonarjs/no-hardcoded-ip -- Test value, not a real IP address
+      const invalidVersion = '1.2.3.4';
+      const newVersion = calculateNewVersion(invalidVersion, 'feat: add feature');
+      expect(newVersion).toBeUndefined();
+    });
+
+    test('returns undefined for version with NaN parts', () => {
+      const invalidVersion = '1.2.invalid';
+      const newVersion = calculateNewVersion(invalidVersion, 'feat: add feature');
+      expect(newVersion).toBeUndefined();
+    });
+  });
+
+  describe('updatePackageVersion', () => {
+    let temporaryDirectory: string;
+    let temporaryPackageJson: string;
+
+    beforeEach(() => {
+      temporaryDirectory = mkdtempSync(path.join(tmpdir(), 'bump-version-test-'));
+      temporaryPackageJson = path.join(temporaryDirectory, 'package.json');
+    });
+
+    afterEach(() => {
+      rmSync(temporaryDirectory, { recursive: true, force: true });
+    });
+
+    test('returns error when commit message is empty', () => {
+      writeFileSync(temporaryPackageJson, JSON.stringify({ version: '1.2.3' }, undefined, 2));
+      const result = updatePackageVersion(temporaryPackageJson, '');
+      expect(result.updated).toBe(false);
+      expect(result.message).toBe('No commit message provided');
+    });
+
+    test('updates version for feat commit', () => {
+      writeFileSync(temporaryPackageJson, JSON.stringify({ version: '1.2.3' }, undefined, 2));
+      const result = updatePackageVersion(temporaryPackageJson, 'feat: add feature');
+      expect(result.updated).toBe(true);
+      expect(result.newVersion).toBe('1.3.0');
+      expect(result.oldVersion).toBe('1.2.3');
+      const packageJson = JSON.parse(readFileSync(temporaryPackageJson, 'utf8'));
+      expect(packageJson.version).toBe('1.3.0');
+    });
+
+    test('returns error when commit type does not trigger bump', () => {
+      writeFileSync(temporaryPackageJson, JSON.stringify({ version: '1.2.3' }, undefined, 2));
+      const result = updatePackageVersion(temporaryPackageJson, 'docs: update readme');
+      expect(result.updated).toBe(false);
+      expect(result.message).toContain('does not trigger version bump');
+    });
+
+    test('handles invalid package.json gracefully', () => {
+      writeFileSync(temporaryPackageJson, 'invalid json');
+      expect(() => {
+        updatePackageVersion(temporaryPackageJson, 'feat: add feature');
+      }).toThrow();
     });
   });
 });

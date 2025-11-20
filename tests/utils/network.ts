@@ -1,8 +1,8 @@
 import * as net from 'node:net';
+import { setTimeout } from 'node:timers/promises';
 
 import type { Page, Response } from '@playwright/test';
 
-import { setTimeout } from 'node:timers/promises';
 
 async function waitForPort(port: number, timeout = 5000, host = 'localhost'): Promise<void> {
   const startTime = Date.now();

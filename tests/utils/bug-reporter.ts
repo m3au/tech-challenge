@@ -1,14 +1,18 @@
+import { existsSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
 
 import type { TestInfo } from '@playwright/test';
 import { test as baseTest } from '@playwright/test';
-import { existsSync } from 'node:fs';
-import path from 'node:path';
 
 import type { AutomationExerciseUser } from '@automationexercise/utils/user-data';
 
+
 export interface BugReport {
   timestamp: string;
+  challenge?: string;
+  testTitle?: string;
+  testFile?: string;
   cableBeginningType: string;
   cableBeginningConnector: string;
   cableEndType: string;
@@ -121,6 +125,20 @@ export function extractStepsToReproduce(testInfo: TestInfo, testContext: TestCon
 }
 
 /**
+ * Extracts challenge name from testInfo project name.
+ * Project names follow pattern: "{challenge}-{browser}" (e.g., "uitestingplayground-chromium")
+ */
+function extractChallengeName(testInfo: TestInfo): string | undefined {
+  const projectName = testInfo.project?.name;
+  if (!projectName) {
+    return undefined;
+  }
+  // Extract challenge name before first hyphen (uitestingplayground-chromium -> uitestingplayground)
+  const match = projectName.match(/^([^-]+)/);
+  return match ? match[1] : undefined;
+}
+
+/**
  * Creates a bug report from test error information and test context.
  * Includes cable configuration, error message, and steps to reproduce.
  */
@@ -128,9 +146,13 @@ export function createBugReport(testInfo: TestInfo, testContext: TestContext): B
   const timestamp = new Date().toISOString();
   const errorMessage = testInfo.error?.message || testInfo.error?.toString() || 'Unknown error';
   const stepsToReproduce = extractStepsToReproduce(testInfo, testContext);
+  const challenge = extractChallengeName(testInfo);
 
   return {
     timestamp,
+    challenge,
+    testTitle: testInfo.title,
+    testFile: testInfo.file?.replace(process.cwd(), '').replace(/^\//, ''),
     cableBeginningType: testContext.cableBeginningType || 'unknown',
     cableBeginningConnector: testContext.cableBeginningConnector || 'unknown',
     cableEndType: testContext.cableEndType || 'unknown',

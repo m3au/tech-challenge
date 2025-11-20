@@ -1,6 +1,10 @@
-import { describe, expect, test, beforeEach, afterEach, mock } from 'bun:test';
 import { existsSync, unlinkSync, readFileSync } from 'node:fs';
 import path from 'node:path';
+
+import type { TestInfo } from '@playwright/test';
+import { test as baseTest } from '@playwright/test';
+import { describe, expect, test, beforeEach, afterEach, mock } from 'bun:test';
+
 import {
   addTestStep,
   clearTestContext,
@@ -11,8 +15,6 @@ import {
   appendBugReport,
   type TestContext,
 } from '@utils';
-import type { TestInfo } from '@playwright/test';
-import { test as baseTest } from '@playwright/test';
 
 const TEST_ID_1 = 'test-1';
 const TEST_ID_2 = 'test-2';
@@ -252,6 +254,50 @@ describe('bug-reporter', () => {
 
       const bugReport = createBugReport(mockTestInfo, testContext);
       expect(bugReport.error).toBe('Unknown error');
+    });
+
+    test('should extract challenge name from project name with hyphen', () => {
+      const mockTestInfo = createMockTestInfo({
+        error: { message: 'Test error' },
+        project: { name: 'uitestingplayground-chromium' },
+      });
+      const testContext: TestContext = {};
+
+      const bugReport = createBugReport(mockTestInfo, testContext);
+      expect(bugReport.challenge).toBe('uitestingplayground');
+    });
+
+    test('should extract challenge name from project name without hyphen', () => {
+      const mockTestInfo = createMockTestInfo({
+        error: { message: 'Test error' },
+        project: { name: 'automationexercise' },
+      });
+      const testContext: TestContext = {};
+
+      const bugReport = createBugReport(mockTestInfo, testContext);
+      expect(bugReport.challenge).toBe('automationexercise');
+    });
+
+    test('should return undefined challenge when project name is missing', () => {
+      const mockTestInfo = createMockTestInfo({
+        error: { message: 'Test error' },
+        project: undefined,
+      });
+      const testContext: TestContext = {};
+
+      const bugReport = createBugReport(mockTestInfo, testContext);
+      expect(bugReport.challenge).toBeUndefined();
+    });
+
+    test('should return undefined challenge when project name does not match pattern', () => {
+      const mockTestInfo = createMockTestInfo({
+        error: { message: 'Test error' },
+        project: { name: '' },
+      });
+      const testContext: TestContext = {};
+
+      const bugReport = createBugReport(mockTestInfo, testContext);
+      expect(bugReport.challenge).toBeUndefined();
     });
   });
 

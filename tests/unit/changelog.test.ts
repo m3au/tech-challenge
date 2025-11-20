@@ -1,7 +1,17 @@
-import { categoryMap, formatEntry, parseCommitMessage } from '@scripts/changelog.mjs';
-import { describe, expect, test } from 'bun:test';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 
-describe('changelog.mjs', () => {
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
+
+import {
+  categoryMap,
+  formatEntry,
+  parseCommitMessage,
+  updateChangelog,
+} from '@scripts/changelog.ts';
+
+describe('changelog.ts', () => {
   describe('commit message parsing', () => {
     test('parses standard commit format', () => {
       const commitMessage = 'feat: add new feature';
@@ -59,6 +69,18 @@ BREAKING: api changed`;
       const commitMessage = 'invalid message';
       const parsed = parseCommitMessage(commitMessage);
 
+      expect(parsed).toBeUndefined();
+    });
+
+    test('returns undefined when type is missing', () => {
+      const commitMessage = ': missing type';
+      const parsed = parseCommitMessage(commitMessage);
+      expect(parsed).toBeUndefined();
+    });
+
+    test('returns undefined when subject is missing', () => {
+      const commitMessage = 'feat:';
+      const parsed = parseCommitMessage(commitMessage);
       expect(parsed).toBeUndefined();
     });
   });
@@ -134,6 +156,97 @@ BREAKING: api changed`;
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
       expect(dateRegex.test(today)).toBe(true);
+    });
+  });
+
+  describe('updateChangelog edge cases', () => {
+    let temporaryDirectory: string;
+    let temporaryChangelog: string;
+
+    beforeEach(() => {
+      temporaryDirectory = mkdtempSync(path.join(tmpdir(), 'changelog-test-'));
+      temporaryChangelog = path.join(temporaryDirectory, 'CHANGELOG.md');
+    });
+
+    afterEach(() => {
+      rmSync(temporaryDirectory, { recursive: true, force: true });
+    });
+
+    test('returns error when commit message is empty', () => {
+      const result = updateChangelog(temporaryChangelog, '', '1.0.0');
+      expect(result.updated).toBe(false);
+      expect(result.message).toBe('Missing commit message or version');
+    });
+
+    test('returns error when version is empty', () => {
+      const result = updateChangelog(temporaryChangelog, 'feat: add feature', '');
+      expect(result.updated).toBe(false);
+      expect(result.message).toBe('Missing commit message or version');
+    });
+
+    test('inserts new category when category not found in existing version', () => {
+      const existingChangelog = `# Changelog
+
+## [1.0.0] - 2024-01-01
+### Fixed
+- Fixed bug
+
+`;
+      writeFileSync(temporaryChangelog, existingChangelog);
+      const result = updateChangelog(temporaryChangelog, 'feat: add feature', '1.0.0');
+      expect(result.updated).toBe(true);
+      const content = readFileSync(temporaryChangelog, 'utf8');
+      expect(content).toContain('### Added');
+      expect(content).toContain('add feature');
+    });
+
+    test('creates new version section when version does not exist', () => {
+      const existingChangelog = `# Changelog
+
+## [1.0.0] - 2024-01-01
+### Fixed
+- Fixed bug
+
+`;
+      writeFileSync(temporaryChangelog, existingChangelog);
+      const result = updateChangelog(temporaryChangelog, 'feat: new feature', '2.0.0');
+      expect(result.updated).toBe(true);
+      const content = readFileSync(temporaryChangelog, 'utf8');
+      expect(content).toContain('## [2.0.0]');
+      expect(content.indexOf('## [2.0.0]')).toBeLessThan(content.indexOf('## [1.0.0]'));
+    });
+
+    test('handles changelog without version sections', () => {
+      const existingChangelog = `# Changelog
+
+Some content here.
+`;
+      writeFileSync(temporaryChangelog, existingChangelog);
+      const result = updateChangelog(temporaryChangelog, 'feat: add feature', '1.0.0');
+      expect(result.updated).toBe(true);
+      const content = readFileSync(temporaryChangelog, 'utf8');
+      expect(content).toContain('## [1.0.0]');
+    });
+
+    test('handles breaking change with new version', () => {
+      writeFileSync(temporaryChangelog, '# Changelog\n\n');
+      const result = updateChangelog(temporaryChangelog, 'feat!: breaking change', '2.0.0');
+      expect(result.updated).toBe(true);
+      const content = readFileSync(temporaryChangelog, 'utf8');
+      expect(content).toContain('### ⚠️ BREAKING CHANGES');
+    });
+
+    test('handles changelog without version sections but with header', () => {
+      const existingChangelog = `# Changelog
+
+Some content here.
+`;
+      writeFileSync(temporaryChangelog, existingChangelog);
+      const result = updateChangelog(temporaryChangelog, 'feat: add feature', '1.0.0');
+      expect(result.updated).toBe(true);
+      const content = readFileSync(temporaryChangelog, 'utf8');
+      expect(content).toContain('## [1.0.0]');
+      expect(content).toContain('add feature');
     });
   });
 });

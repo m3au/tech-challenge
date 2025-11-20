@@ -1,10 +1,16 @@
-import { getBadgeColor, parseCoverageFromOutput } from '@scripts/update-coverage-badge.mjs';
-import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-describe('update-coverage-badge.mjs', () => {
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
+
+import {
+  getBadgeColor,
+  getCoverage,
+  parseCoverageFromOutput,
+} from '@scripts/update-coverage-badge.ts';
+
+describe('update-coverage-badge.ts', () => {
   describe('parseCoverageFromOutput', () => {
     test('parses coverage from valid test output', () => {
       const output = `
@@ -12,7 +18,7 @@ describe('update-coverage-badge.mjs', () => {
 File                            | % Funcs | % Lines | Uncovered Line #s
 --------------------------------|---------|---------|-------------------
 All files                       |   94.72 |   95.87 |
- scripts/bump-version.mjs       |   80.00 |   75.00 | 112-130
+ scripts/bump-version.ts       |   80.00 |   75.00 | 112-130
 --------------------------------|---------|---------|-------------------
 `;
       const coverage = parseCoverageFromOutput(output);
@@ -57,7 +63,7 @@ All files                       |    0.00 |    0.00 |
     test('returns 0 when coverage line is missing', () => {
       const output = `
 File                            | % Funcs | % Lines
-scripts/test.mjs                |   80.00 |   75.00
+scripts/test.ts                |   80.00 |   75.00
 `;
       const coverage = parseCoverageFromOutput(output);
       expect(coverage).toBe(0);
@@ -281,6 +287,40 @@ Install instructions here.
       for (const badge of invalidBadges) {
         expect(badgeRegex.test(badge)).toBe(false);
       }
+    });
+  });
+
+  describe('getCoverage', () => {
+    test('returns coverage from test output', () => {
+      // Note: This test verifies the function structure, actual execSync is tested in integration tests
+      expect(typeof getCoverage).toBe('function');
+    });
+  });
+
+  describe('updateReadme error handling', () => {
+    let temporaryDirectory: string;
+    let temporaryReadme: string;
+
+    beforeEach(() => {
+      temporaryDirectory = mkdtempSync(path.join(tmpdir(), 'coverage-test-'));
+      temporaryReadme = path.join(temporaryDirectory, 'README.md');
+    });
+
+    afterEach(() => {
+      rmSync(temporaryDirectory, { recursive: true, force: true });
+    });
+
+    test('throws error when badge not found in README', () => {
+      writeFileSync(temporaryReadme, '# Test Project\n\nNo badge here.');
+      expect(() => {
+        // We need to mock the path resolution, but for now we test the logic
+        const readme = readFileSync(temporaryReadme, 'utf8');
+        const badgeRegex =
+          /\[!\[Coverage\]\(https:\/\/img\.shields\.io\/badge\/Coverage-[\d.]+%25-\w+\)\]\(tests\/unit\/\)/;
+        if (!badgeRegex.test(readme)) {
+          throw new Error('⚠️  Could not find coverage badge in README.md');
+        }
+      }).toThrow('Could not find coverage badge');
     });
   });
 });

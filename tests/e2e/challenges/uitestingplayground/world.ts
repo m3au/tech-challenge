@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+
 import { test as baseTest } from '../../world';
 
 export const test = baseTest.extend<{

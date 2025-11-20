@@ -1,9 +1,10 @@
-import { describe, expect, test } from 'bun:test';
 
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
-describe('lint.mjs', () => {
+import { describe, expect, test } from 'bun:test';
+
+describe('lint.ts', () => {
   describe('binary path resolution', () => {
     test('constructs local binary path', () => {
       const projectRoot = '/test/project';
@@ -16,7 +17,6 @@ describe('lint.mjs', () => {
     test('falls back to global binary', () => {
       const projectRoot = '/test/project';
       const localBin = path.join(projectRoot, 'node_modules', '.bin', 'eslint');
-      // eslint-disable-next-line playwright/no-conditional-in-test -- testing fallback logic
       const fallback = existsSync(localBin) ? localBin : 'eslint';
 
       expect(typeof fallback).toBe('string');

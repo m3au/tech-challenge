@@ -4,6 +4,10 @@
 1.15.0] - 2025-11-20
 ### Added
 - **ci**: add new report template files
+## [♻️ Refactor detected: 1.15.0 -> 1.15.1
+1.15.1] - 2025-11-20
+### Refactored
+- **tests**: update test files and utilities
 ## [1.14.2] - 2025-11-19
 
 ### Fixed

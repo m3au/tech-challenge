@@ -1,5 +1,6 @@
-import { calculateTargetPageIndex, navigateToPageIndex, waitForDOMStabilization } from '@utils';
 import { describe, expect, mock, test } from 'bun:test';
+
+import { calculateTargetPageIndex, navigateToPageIndex, waitForDOMStabilization } from '@utils';
 
 describe('pagination utilities', () => {
   describe('calculateTargetPageIndex', () => {

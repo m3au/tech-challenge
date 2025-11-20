@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 
-describe('pin-versions.mjs', () => {
+describe('pin-versions.ts', () => {
   describe('isPinned logic', () => {
     test('identifies caret ranges as unpinned', () => {
       const spec = '^1.2.3';
@@ -16,7 +16,7 @@ describe('pin-versions.mjs', () => {
 
     test('identifies exact versions as pinned', () => {
       const spec = '1.2.3';
-      const exactSemver = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
+      const exactSemver = /^\d+\.\d+\.\d+(?:-[0-9a-z.-]+)?(?:\+[0-9a-z.-]+)?$/i;
       const isPinned = exactSemver.test(spec.trim());
       expect(isPinned).toBe(true);
     });
@@ -35,21 +35,21 @@ describe('pin-versions.mjs', () => {
 
     test('identifies prerelease versions as pinned', () => {
       const spec = '1.2.3-beta.1';
-      const exactSemver = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
+      const exactSemver = /^\d+\.\d+\.\d+(?:-[0-9a-z.-]+)?(?:\+[0-9a-z.-]+)?$/i;
       const isPinned = exactSemver.test(spec.trim());
       expect(isPinned).toBe(true);
     });
 
     test('identifies build metadata versions as pinned', () => {
       const spec = '1.2.3+build.123';
-      const exactSemver = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
+      const exactSemver = /^\d+\.\d+\.\d+(?:-[0-9a-z.-]+)?(?:\+[0-9a-z.-]+)?$/i;
       const isPinned = exactSemver.test(spec.trim());
       expect(isPinned).toBe(true);
     });
 
     test('identifies partial versions as unpinned', () => {
       const spec = '1.2';
-      const exactSemver = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
+      const exactSemver = /^\d+\.\d+\.\d+(?:-[0-9a-z.-]+)?(?:\+[0-9a-z.-]+)?$/i;
       const isPinned = exactSemver.test(spec.trim());
       expect(isPinned).toBe(false);
     });
@@ -63,7 +63,7 @@ describe('pin-versions.mjs', () => {
 
   describe('version string validation', () => {
     test('validates exact semver format', () => {
-      const exactSemver = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
+      const exactSemver = /^\d+\.\d+\.\d+(?:-[0-9a-z.-]+)?(?:\+[0-9a-z.-]+)?$/i;
 
       expect(exactSemver.test('1.2.3')).toBe(true);
       expect(exactSemver.test('0.0.1')).toBe(true);
@@ -73,7 +73,7 @@ describe('pin-versions.mjs', () => {
     });
 
     test('rejects invalid semver formats', () => {
-      const exactSemver = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
+      const exactSemver = /^\d+\.\d+\.\d+(?:-[0-9a-z.-]+)?(?:\+[0-9a-z.-]+)?$/i;
 
       expect(exactSemver.test('^1.2.3')).toBe(false);
       expect(exactSemver.test('~1.2.3')).toBe(false);

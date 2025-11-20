@@ -1,11 +1,11 @@
-import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { readFileSync, unlinkSync, writeFileSync } from 'node:fs';
-
 import path from 'node:path';
-// @ts-ignore - .mjs import not recognized by TypeScript
-import { updatePackageVersion } from '@scripts/bump-version.mjs';
 
-describe('bump-version.mjs integration', () => {
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
+
+import { updatePackageVersion } from '@scripts/bump-version.ts';
+
+describe('bump-version.ts integration', () => {
   const testPackageJson = path.join(process.cwd(), 'package.json');
   let originalPackageJson: string;
 

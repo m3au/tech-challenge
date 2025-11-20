@@ -6,6 +6,8 @@ import { getAxeResults, injectAxe } from 'axe-playwright';
 
 import { environment } from '@utils';
 
+import { getSharedStyles, themes } from '../../scripts/template-utils';
+
 /* eslint-disable playwright/no-conditional-in-test -- Accessibility audits require guard clauses for optional UI state and assets */
 
 interface AxeViolationNode {
@@ -24,12 +26,26 @@ interface AxeViolation {
 interface AxeTarget {
   name: string;
   url: string;
+  description?: string;
 }
 
 const axeTargets: AxeTarget[] = [
-  { name: 'w3c-bad', url: environment('BASE_URL_AXE_W3C_BAD')! },
-  { name: 'w3c-after', url: environment('BASE_URL_AXE_W3C_AFTER')! },
-  { name: 'deque-mars', url: environment('BASE_URL_AXE_DEQUE_MARS')! },
+  {
+    name: 'w3c-bad',
+    url: environment('BASE_URL_AXE_W3C_BAD')!,
+    description: 'W3C Before Fix Demo – Demonstrates accessibility issues that need fixing',
+  },
+  {
+    name: 'w3c-after',
+    url: environment('BASE_URL_AXE_W3C_AFTER')!,
+    description:
+      'W3C After Fix Demo – Shows improved accessibility (may still have issues as it tests more elements)',
+  },
+  {
+    name: 'deque-mars',
+    url: environment('BASE_URL_AXE_DEQUE_MARS')!,
+    description: 'Deque University Mars Demo – Educational accessibility testing site',
+  },
 ];
 
 const maxViolations = +environment('AXE_MAX_VIOLATIONS')!;
@@ -50,52 +66,51 @@ function sanitizeName(name: string): string {
 
 function writeSummary(): void {
   const summaryPath = path.join(axeDirectory, 'index.html');
+  const templatePath = path.join(process.cwd(), '.github', 'templates', 'axe-summary.html');
+
+  if (!fs.existsSync(templatePath)) {
+    throw new Error(`Template not found: ${templatePath}`);
+  }
+
+  let html = fs.readFileSync(templatePath, 'utf8');
+
   const listItems = processedTargets
-    .map(
-      (target) =>
-        `<li><a href="./${target.directory}/index.html">${target.name}</a><br /><small>${target.url}</small></li>`,
-    )
+    .map((target) => {
+      const targetInfo = axeTargets.find((t) => t.name === target.name);
+      const description = targetInfo?.description
+        ? `<div class="target-description">${targetInfo.description} – <a href="${target.url}" class="target-url" target="_blank" rel="noopener noreferrer">${target.url}</a></div>`
+        : `<div class="target-description"><a href="${target.url}" class="target-url" target="_blank" rel="noopener noreferrer">${target.url}</a></div>`;
+      return `<li>
+        <a href="./${target.directory}/index.html" class="target-link">${target.name}</a>
+        ${description}
+      </li>`;
+    })
     .join('\n');
 
-  const summaryHtml = `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Axe Accessibility Audits</title>
-    <style>
-      body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 3rem 1.5rem; }
-      .container { max-width: 960px; margin: 0 auto; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(18px); border-radius: 16px; padding: 2.5rem; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.8); }
-      h1 { margin-top: 0; font-size: 2rem; }
-      p { color: #94a3b8; line-height: 1.6; }
-      ul { list-style: none; margin: 2rem 0 0; padding: 0; display: grid; gap: 1rem; }
-      li { background: rgba(30, 41, 59, 0.9); border-radius: 12px; padding: 1rem 1.25rem; border: 1px solid rgba(148, 163, 184, 0.2); transition: transform 0.2s ease, border-color 0.2s ease; }
-      li:hover { transform: translateY(-3px); border-color: #38bdf8; }
-      a { color: #38bdf8; text-decoration: none; font-weight: 600; }
-      a:hover { text-decoration: underline; }
-      small { color: #64748b; }
-      .note { margin-top: 2rem; font-size: 0.875rem; color: #cbd5f5; }
-      code { background: rgba(30, 41, 59, 0.7); padding: 0.1rem 0.4rem; border-radius: 4px; }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>♿ Axe Accessibility Audits</h1>
+  // eslint-disable-next-line no-secrets/no-secrets -- False positive: environment variable name in HTML template
+  const descriptionHtml = `
       <p>
-        These reports are generated with intentionally strict thresholds (<code>AXE_MAX_VIOLATIONS=${maxViolations}</code>)
+        These reports are generated with intentionally strict thresholds (
+        <code>AXE_MAX_VIOLATIONS=${maxViolations}</code>)
         so they are expected to fail. CI keeps running to ensure the results are still collected and published.
-      </p>
-      <ul>
-        ${listItems}
-      </ul>
+      </p>`;
+
+  const notesHtml = `
       <p class="note">
         Each link opens a standalone accessibility report with embedded JSON data so it can be viewed offline.
       </p>
-    </div>
-  </body>
-</html>`;
+      <p class="note" style="margin-top: 1rem;">
+        <strong>Note:</strong> The "w3c-after" demo may show more violations than "w3c-bad" because it tests a more complex page structure with additional elements and features, demonstrating that fixing one set of issues can reveal others or require testing more comprehensive scenarios.
+      </p>`;
 
-  fs.writeFileSync(summaryPath, summaryHtml);
+  // Replace placeholders
+  const sharedStyles = getSharedStyles(themes.axe);
+  html = html.replaceAll('{{SHARED_STYLES}}', sharedStyles);
+  html = html.replaceAll('{{DESCRIPTION}}', descriptionHtml);
+  html = html.replaceAll('{{LIST_ITEMS}}', listItems);
+  html = html.replaceAll('{{NOTES}}', notesHtml);
+
+  fs.writeFileSync(summaryPath, html);
 }
 
 for (const target of axeTargets) {
@@ -129,9 +144,15 @@ for (const target of axeTargets) {
         '<title>Axe Accessibility Report</title>',
         `<title>Axe Accessibility Report – ${target.name}</title>`,
       );
+      const titleHtml = target.description
+        ? `<h1>♿ Axe Accessibility Report – ${target.name}</h1>
+        <p class="target-description">${target.description}</p>
+        <p class="target-url"><strong>Audited URL:</strong> <a href="${target.url}" target="_blank" rel="noopener noreferrer">${target.url}</a></p>`
+        : `<h1>♿ Axe Accessibility Report – ${target.name}</h1>
+        <p class="target-url"><strong>Audited URL:</strong> <a href="${target.url}" target="_blank" rel="noopener noreferrer">${target.url}</a></p>`;
       htmlContent = htmlContent.replaceAll(
-        '<h1>♿ Axe Accessibility Report</h1>',
-        `<h1>♿ Axe Accessibility Report – ${target.name}</h1>`,
+        '<h1>♿ Axe Accessibility Report</h1>\n        <p>Automated accessibility testing using axe-core engine</p>',
+        titleHtml,
       );
       fs.writeFileSync(path.join(targetDirectory, 'index.html'), htmlContent);
     }

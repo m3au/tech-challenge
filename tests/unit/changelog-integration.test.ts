@@ -1,11 +1,11 @@
-/* eslint-disable playwright/no-conditional-in-test -- test setup and cleanup */
-import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-// @ts-ignore - .mjs import not recognized by TypeScript
-import { updateChangelog } from '@scripts/changelog.mjs';
 
-describe('changelog.mjs integration', () => {
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
+
+import { updateChangelog } from '@scripts/changelog.ts';
+
+describe('changelog.ts integration', () => {
   const changelogFile = path.join(process.cwd(), 'CHANGELOG.md');
   let originalChangelog: string | undefined;
 
