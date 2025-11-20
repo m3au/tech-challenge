@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 /**
  * Update coverage badge in README.md based on actual test coverage
@@ -14,9 +14,8 @@ const __dirname = path.dirname(__filename);
 
 /**
  * Get coverage percentage from test output
- * @returns {number} Coverage percentage
  */
-export function getCoverage() {
+export function getCoverage(): number {
   try {
     // Run tests with coverage
     // eslint-disable-next-line sonarjs/no-os-command-from-path -- execSync is required to run bun commands
@@ -31,17 +30,16 @@ export function getCoverage() {
     }
     return coverage;
   } catch (error) {
-    console.error('⚠️  Error running tests:', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('⚠️  Error running tests:', message);
     return 0;
   }
 }
 
 /**
  * Get badge color based on coverage percentage
- * @param {number} coverage - Coverage percentage
- * @returns {string} Badge color
  */
-export function getBadgeColor(coverage) {
+export function getBadgeColor(coverage: number): string {
   if (coverage >= 90) return 'brightgreen';
   if (coverage >= 80) return 'green';
   if (coverage >= 70) return 'yellow';
@@ -51,19 +49,16 @@ export function getBadgeColor(coverage) {
 
 /**
  * Parse coverage percentage from test output
- * @param {string} output - Test output string
- * @returns {number} Coverage percentage or 0 if not found
  */
-export function parseCoverageFromOutput(output) {
+export function parseCoverageFromOutput(output: string): number {
   const match = output.match(/All files\s+\|\s+[\d.]+\s+\|\s+([\d.]+)\s+\|/);
   return match?.[1] ? Number.parseFloat(match[1]) : 0;
 }
 
 /**
  * Update coverage badge in README
- * @param {number} coverage - Coverage percentage
  */
-export function updateReadme(coverage) {
+export function updateReadme(coverage: number): void {
   const readmePath = path.join(__dirname, '..', 'README.md');
   const readme = readFileSync(readmePath, 'utf8');
 

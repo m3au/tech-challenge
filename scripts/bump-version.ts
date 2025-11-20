@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 /**
  * Package.json version bumper based on Conventional Commits
@@ -12,16 +12,18 @@
  */
 
 import { readFileSync, writeFileSync } from 'node:fs';
-
-import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+interface CommitTypeMetadata {
+  emoji: string;
+  name: string;
+}
 
 /**
  * Parse commit type from conventional commit message
- * @param {string} commitMessage - The commit message to parse
- * @returns {string | undefined} The commit type or undefined if invalid
  */
-export function parseCommitType(commitMessage) {
+export function parseCommitType(commitMessage: string): string | undefined {
   return commitMessage.match(
     /^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?(!)?:/,
   )?.[1];
@@ -29,25 +31,30 @@ export function parseCommitType(commitMessage) {
 
 /**
  * Check if commit message indicates a breaking change
- * @param {string} commitMessage - The commit message to check
- * @returns {boolean} True if breaking change detected
  */
-export function isBreakingChange(commitMessage) {
+export function isBreakingChange(commitMessage: string): boolean {
   return (
     commitMessage.includes('BREAKING CHANGE') ||
     commitMessage.includes('BREAKING:') ||
-    /^(feat|fix|perf|refactor)(\(.+\))?!:/.test(commitMessage)
+    /^(?:feat|fix|perf|refactor)(?:\(.+\))?!:/.test(commitMessage)
   );
 }
 
 /**
  * Calculate new version based on commit message
- * @param {string} currentVersion - Current semver version (e.g., "1.2.3")
- * @param {string} commitMessage - Conventional commit message
- * @returns {string | undefined} New version or undefined if no bump needed
  */
-export function calculateNewVersion(currentVersion, commitMessage) {
-  const [major, minor, patch] = currentVersion.split('.').map(Number);
+export function calculateNewVersion(
+  currentVersion: string,
+  commitMessage: string,
+): string | undefined {
+  const parts = currentVersion.split('.').map(Number);
+  if (parts.length !== 3 || parts.some((p) => Number.isNaN(p))) {
+    return;
+  }
+  const [major, minor, patch] = parts;
+  if (major === undefined || minor === undefined || patch === undefined) {
+    return;
+  }
   const commitType = parseCommitType(commitMessage);
   const isBreaking = isBreakingChange(commitMessage);
 
@@ -62,18 +69,22 @@ export function calculateNewVersion(currentVersion, commitMessage) {
   }
 }
 
+interface UpdateResult {
+  updated: boolean;
+  oldVersion: string;
+  newVersion?: string;
+  message?: string;
+}
+
 /**
  * Update package.json version based on commit message
- * @param {string} packageJsonPath - Path to package.json
- * @param {string} commitMessage - Conventional commit message
- * @returns {{ updated: boolean, oldVersion: string, newVersion?: string, message?: string }} Result object
  */
-export function updatePackageVersion(packageJsonPath, commitMessage) {
+export function updatePackageVersion(packageJsonPath: string, commitMessage: string): UpdateResult {
   if (!commitMessage.trim()) {
     return { updated: false, oldVersion: '', message: 'No commit message provided' };
   }
 
-  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as { version: string };
   const currentVersion = packageJson.version;
   const newVersion = calculateNewVersion(currentVersion, commitMessage);
 
@@ -88,11 +99,18 @@ export function updatePackageVersion(packageJsonPath, commitMessage) {
 
   const commitType = parseCommitType(commitMessage);
   const isBreaking = isBreakingChange(commitMessage);
-  const commitTypeMetadata = {
-    feat: { emoji: '✨', name: 'Feature' },
-    fix: { emoji: '🐛', name: 'Fix' },
-    perf: { emoji: '⚡', name: 'Performance' },
-    refactor: { emoji: '🔧', name: 'Refactor' },
+  const commitTypeMetadata: Record<string, CommitTypeMetadata> = {
+    feat: { emoji: '✨', name: 'Feature' }, // Introduce new features
+    fix: { emoji: '🐛', name: 'Fix' }, // Fix a bug
+    docs: { emoji: '📝', name: 'Documentation' }, // Add or update documentation
+    style: { emoji: '🎨', name: 'Style' }, // Improve structure / format of the code
+    refactor: { emoji: '♻️', name: 'Refactor' }, // Refactor code
+    test: { emoji: '✅', name: 'Tests' }, // Add, update, or pass tests
+    chore: { emoji: '🔨', name: 'Chore' }, // Add or update development scripts
+    perf: { emoji: '⚡', name: 'Performance' }, // Improve performance
+    ci: { emoji: '👷', name: 'CI/CD' }, // Add or update CI build system
+    build: { emoji: '📦', name: 'Build' }, // Add or update compiled files or packages
+    revert: { emoji: '⏪', name: 'Revert' }, // Revert changes
   };
 
   let logMessage = '';
@@ -125,9 +143,10 @@ function main() {
 
     console.log(result.message);
     console.error(result.message);
-    process.stdout.write(result.newVersion);
+    process.stdout.write(result.newVersion ?? '');
   } catch (error) {
-    console.error('⚠️  Error bumping version:', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('⚠️  Error bumping version:', message);
     process.exit(0);
   }
 }

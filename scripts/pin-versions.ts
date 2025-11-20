@@ -1,21 +1,18 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
-import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 
 /**
  * Returns the installed version string for a package name.
- * @param {string} packageName
- * @param {string} basedir
- * @returns {string|undefined}
  */
-function getInstalledVersion(packageName, basedir) {
+function getInstalledVersion(packageName: string, basedir: string): string | undefined {
   try {
     const request = createRequire(path.join(basedir, 'package.json'));
     const packageJsonPath = request.resolve(`${packageName}/package.json`);
-    const content = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    const content = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')) as { version?: string };
     return typeof content.version === 'string' ? content.version : undefined;
   } catch {
     return;
@@ -24,11 +21,8 @@ function getInstalledVersion(packageName, basedir) {
 
 /**
  * Fallback: resolve a concrete version from the registry for a given range spec.
- * @param {string} packageName
- * @param {string} spec
- * @returns {string|undefined}
  */
-function getRegistryVersion(packageName, spec) {
+function getRegistryVersion(packageName: string, spec: string): string | undefined {
   try {
     const cmd = `npm view ${packageName}@${spec} version --json`;
     // eslint-disable-next-line sonarjs/os-command -- Safe: npm view is a standard package manager command with controlled input
@@ -46,7 +40,7 @@ function getRegistryVersion(packageName, spec) {
       }
     } catch {
       // eslint-disable-next-line sonarjs/slow-regex -- Simple regex, safe for version matching
-      const matches = out.match(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/g);
+      const matches = out.match(/\d+\.\d+\.\d+(?:-[0-9a-z.-]+)?/gi);
       // eslint-disable-next-line sonarjs/os-command -- Safe: using sanitized output from npm view command
       if (matches && matches.length > 0) return matches.at(-1);
     }
@@ -58,30 +52,28 @@ function getRegistryVersion(packageName, spec) {
 
 /**
  * Determine if a version spec is already pinned (exact x.y.z).
- * @param {string} spec
- * @returns {boolean}
  */
-function isPinned(spec) {
+function isPinned(spec: unknown): boolean {
   if (typeof spec !== 'string') return true;
   const trimmed = spec.trim();
   if (/^[~^<>*=]/.test(trimmed)) return false;
   if (trimmed === 'latest' || trimmed === '*') return false;
-  if (/^[xX]$/.test(trimmed)) return false;
+  if (/^x$/i.test(trimmed)) return false;
   if (/\bx\b/i.test(trimmed)) return false;
   if (/^\d+$/.test(trimmed)) return false;
   if (/^\d+\.\d+$/.test(trimmed)) return false;
-  const exactSemver = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
+  const exactSemver = /^\d+\.\d+\.\d+(?:-[0-9a-z.-]+)?(?:\+[0-9a-z.-]+)?$/i;
   return exactSemver.test(trimmed);
 }
 
 /**
  * Resolve an exact version for a given spec/name or return undefined if unresolved.
- * @param {string} packageName
- * @param {string} spec
- * @param {string} packageDirectory
- * @returns {string|undefined}
  */
-function resolvePinnedSpec(packageName, spec, packageDirectory) {
+function resolvePinnedSpec(
+  packageName: string,
+  spec: string,
+  packageDirectory: string,
+): string | undefined {
   if (typeof spec !== 'string' || isPinned(spec)) return;
   const installed =
     getInstalledVersion(packageName, packageDirectory) ||
@@ -92,15 +84,12 @@ function resolvePinnedSpec(packageName, spec, packageDirectory) {
 
 /**
  * Pin all deps within a single section; returns true if changes were made.
- * @param {Record<string,string>} deps
- * @param {string} packageDirectory
- * @returns {boolean}
  */
-function pinSection(deps, packageDirectory) {
+function pinSection(deps: Record<string, string> | undefined, packageDirectory: string): boolean {
   if (!deps || typeof deps !== 'object') return false;
   let sectionChanged = false;
   for (const [name, spec] of Object.entries(deps)) {
-    const resolved = resolvePinnedSpec(name, /** @type {string} */ (spec), packageDirectory);
+    const resolved = resolvePinnedSpec(name, spec, packageDirectory);
     if (resolved && deps[name] !== resolved) {
       deps[name] = resolved;
       sectionChanged = true;
@@ -109,12 +98,19 @@ function pinSection(deps, packageDirectory) {
   return sectionChanged;
 }
 
-function pinFile(file) {
+function pinFile(file: string): boolean {
   const packageDirectory = path.dirname(file);
-  const json = JSON.parse(fs.readFileSync(file, 'utf8'));
+  const json = JSON.parse(fs.readFileSync(file, 'utf8')) as {
+    dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
+    optionalDependencies?: Record<string, string>;
+    peerDependencies?: Record<string, string>;
+  };
   const sections = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies'];
   const changed = sections
-    .map((section) => pinSection(json[section], packageDirectory))
+    .map((section) =>
+      pinSection(json[section as keyof typeof json] as Record<string, string>, packageDirectory),
+    )
     .some(Boolean);
 
   if (changed) {

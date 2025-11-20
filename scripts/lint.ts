@@ -1,15 +1,15 @@
 #!/usr/bin/env bun
 
-import { existsSync, readdirSync, statSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { existsSync, readdirSync, statSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.join(__dirname, '..');
 
-function runTypeScript() {
+function runTypeScript(): Promise<void> {
   return new Promise((resolve, reject) => {
     console.log('Running TypeScript type checking...');
     const tscBin = existsSync(path.join(projectRoot, 'node_modules', '.bin', 'tsc'))
@@ -29,13 +29,13 @@ function runTypeScript() {
       if (code === 0) {
         resolve();
       } else {
-        reject(new Error(`TypeScript type checking failed with exit code ${code}`));
+        reject(new Error(`TypeScript type checking failed with exit code ${code ?? 0}`));
       }
     });
   });
 }
 
-function runESLint() {
+function runESLint(): Promise<void> {
   return new Promise((resolve, reject) => {
     console.log('\nRunning ESLint...');
     const eslintBin = existsSync(path.join(projectRoot, 'node_modules', '.bin', 'eslint'))
@@ -47,7 +47,7 @@ function runESLint() {
       cwd: projectRoot,
     });
 
-    const fileNames = new Set();
+    const fileNames = new Set<string>();
     let eslintOutput = '';
 
     eslintProcess.stderr.on('data', (data) => {
@@ -105,13 +105,13 @@ function runESLint() {
       if (code === 0) {
         resolve();
       } else {
-        reject(new Error(`ESLint failed with exit code ${code}`));
+        reject(new Error(`ESLint failed with exit code ${code ?? 0}`));
       }
     });
   });
 }
 
-function runShellCheck() {
+function runShellCheck(): Promise<void> {
   return new Promise((resolve, reject) => {
     console.log('\nRunning ShellCheck...');
     const shellCheckBin = existsSync(path.join(projectRoot, 'node_modules', '.bin', 'shellcheck'))
@@ -163,7 +163,7 @@ function runShellCheck() {
       if (code === 0) {
         resolve();
       } else {
-        reject(new Error(`ShellCheck failed with exit code ${code}`));
+        reject(new Error(`ShellCheck failed with exit code ${code ?? 0}`));
       }
     });
   });
@@ -176,6 +176,7 @@ try {
   console.log('\n✓ All linting checks passed');
   process.exit(0);
 } catch (error) {
-  console.error(`\n✗ ${error.message}`);
+  const message = error instanceof Error ? error.message : 'Unknown error';
+  console.error(`\n✗ ${message}`);
   process.exit(1);
 }
