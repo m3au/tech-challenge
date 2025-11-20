@@ -40,6 +40,14 @@
 
 - **deps**: add missing prettier dependency
 
+## [🐛 Fix detected: 1.15.4 -> 1.15.5
+
+1.15.5] - 2025-11-20
+
+### Fixed
+
+- **challenges**: lint and fix reqres API challenge files
+
 ## [1.14.2] - 2025-11-19
 
 ### Fixed

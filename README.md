@@ -13,7 +13,7 @@
 [![Lighthouse](https://img.shields.io/badge/Lighthouse-13.0.1-blue)](https://developer.chrome.com/docs/lighthouse/)
 [![Cursor Ready](https://img.shields.io/badge/Cursor-Ready-brightgreen)](https://cursor.sh/)
 [![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-enabled-brightgreen)](https://github.com/features/actions)
-[![Coverage](https://img.shields.io/badge/Coverage-87.01%25-green)](tests/unit/)
+[![Coverage](https://img.shields.io/badge/Coverage-81.84%25-green)](tests/unit/)
 [![TypeScript ESLint](https://img.shields.io/badge/TypeScript%20ESLint-8.46.2-blue)](https://typescript-eslint.io/)
 [![SonarJS](https://img.shields.io/badge/SonarJS-3.0.5-orange)](https://github.com/SonarSource/eslint-plugin-sonarjs)
 [![Unicorn](https://img.shields.io/badge/Unicorn-62.0.0-purple)](https://github.com/sindresorhus/eslint-plugin-unicorn)
@@ -123,6 +123,8 @@ The template includes two complete challenge implementations demonstrating real-
 
 - **[UITestingPlayground Challenge Documentation](./docs/uitestingplayground-challenge.md)** - Complete guide to all 23 scenarios
 - **[AutomationExercise Challenge Documentation](./docs/automationexercise-challenge.md)** - Complete guide to all 18 scenarios
+- **[JSONPlaceholder API Challenge Documentation](./docs/jsonplaceholder-challenge.md)** - Complete guide to all 34 API scenarios
+- **[ReqRes.in API Challenge Documentation](./docs/reqres-challenge.md)** - Complete guide to authentication and pagination API scenarios
 
 ### UITestingPlayground Challenge
 
@@ -185,6 +187,43 @@ This challenge implements **18 comprehensive e-commerce test scenarios** coverin
 - **User Provisioning** — API client for programmatic account creation
 - **Test Data Generation** — Unique, realistic user data for each test run
 
+### JSONPlaceholder API Challenge
+
+This challenge demonstrates **34 comprehensive API test scenarios** using [JSONPlaceholder](https://jsonplaceholder.typicode.com/), covering all 6 resources (Posts, Users, Comments, Albums, Photos, Todos) with full CRUD operations and relationship queries. See the [full challenge documentation](./docs/jsonplaceholder-challenge.md) for exhaustive details.
+
+**Implemented Resources**:
+
+- **Posts** (5 scenarios) — Blog post CRUD operations
+- **Users** (5 scenarios) — User management operations
+- **Comments** (6 scenarios) — Comment operations with post relationships
+- **Albums** (6 scenarios) — Album operations with user relationships
+- **Photos** (6 scenarios) — Photo operations with album relationships
+- **Todos** (6 scenarios) — Todo operations with completion status
+
+**Key Features**:
+
+- **API Object Model (AOM)** — Service classes following POM pattern for APIs
+- **Shared Utilities** — Response verification, tracking, validation, and data generation
+- **Relationship Queries** — Test nested resources (e.g., comments by post, albums by user)
+- **No Browser Required** — Pure API testing without browser launch overhead
+
+### ReqRes.in API Challenge
+
+This challenge demonstrates **authentication and pagination testing patterns** using [ReqRes.in](https://reqres.in/), a hosted REST API for testing. See the [full challenge documentation](./docs/reqres-challenge.md) for exhaustive details.
+
+**Implemented Features**:
+
+- **Authentication** (4 scenarios) — Login and registration flows with token management
+- **Users API** (6 scenarios) — User CRUD operations and pagination
+- **Pagination** (3 scenarios) — Testing paginated data retrieval
+
+**Key Features**:
+
+- **Token Management** — Utility for managing authentication tokens
+- **Authentication Service** — Login and registration patterns
+- **Pagination Testing** — Comprehensive pagination validation
+- **No Browser Required** — Pure API testing using `APIRequestContext`
+
 ---
 
 ## Test Reports
@@ -193,7 +232,7 @@ This challenge implements **18 comprehensive e-commerce test scenarios** coverin
 
 Check 👉🏼 [GitHub Pages HTML Report](https://m3au.github.io/playwright-bdd-cursor-template/) for the _**Interactive HTML reports**_ generated automatically from Playwright test runs, including test results, traces, screenshots, and accessibility/performance audit reports.
 
-View workflow runs 👉🏼 [GitHub Actions](https://github.com/m3au/playwright-bdd-cursor-template/actions), we're running **41 E2E test scenarios** (23 UITestingPlayground + 18 AutomationExercise) using 2 shards (WORKERS=50% per shard).
+View workflow runs 👉🏼 [GitHub Actions](https://github.com/m3au/playwright-bdd-cursor-template/actions), we're running **80 E2E test scenarios** (23 UITestingPlayground + 18 AutomationExercise + 34 JSONPlaceholder API + 5 ReqRes.in API) using 2 shards (WORKERS=50% per shard).
 
 ---
 
@@ -205,9 +244,13 @@ Comprehensive documentation covering architecture, development workflows, code q
 
 - **[UITestingPlayground Challenge](./docs/uitestingplayground-challenge.md)** - Complete guide to all 23 UI testing scenarios, implementation details, and patterns
 - **[AutomationExercise Challenge](./docs/automationexercise-challenge.md)** - Complete guide to all 18 e-commerce scenarios, user flows, and utilities
+- **[JSONPlaceholder API Challenge](./docs/jsonplaceholder-challenge.md)** - Complete guide to all 34 API testing scenarios, AOM patterns, and utilities
+- **[ReqRes.in API Challenge](./docs/reqres-challenge.md)** - Complete guide to authentication and pagination API testing patterns
 
 ### Project Documentation
 
+- **[CLAUDE.md](./CLAUDE.md)** - AI assistant development guide with project-specific patterns and critical notes
+- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Contribution guidelines, development workflow, and code style
 - **[Architecture Documentation](./docs/architecture.md)** - System architecture, design decisions, and diagrams
 - **[Development Guide](./docs/development.md)** - Development setup, guidelines, and best practices
 - **[Code Quality Files](./docs/code-quality.md)** - Reference guide for all code quality configuration files
@@ -246,10 +289,18 @@ playwright-bdd-cursor-template/
 │   │   │   │   └── poms/             # Page Object Models with decorators
 │   │   │   │       ├── components/   # Reusable component POMs
 │   │   │   │       └── pages/        # Page POMs
-│   │   │   └── automationexercise/   # AutomationExercise challenge
-│   │   │       ├── features/         # Gherkin feature files
-│   │   │       └── poms/             # Page Object Models with decorators
-│   │   │           └── pages/        # Page POMs
+│   │   │   ├── automationexercise/   # AutomationExercise challenge
+│   │   │   │   ├── features/         # Gherkin feature files
+│   │   │   │   └── poms/             # Page Object Models with decorators
+│   │   │   │       └── pages/        # Page POMs
+│   │   │   ├── jsonplaceholder/      # JSONPlaceholder API challenge
+│   │   │   │   ├── features/          # Gherkin feature files
+│   │   │   │   ├── services/         # API Object Models (AOM)
+│   │   │   │   └── utils/            # API testing utilities
+│   │   │   └── reqres/               # ReqRes.in API challenge
+│   │   │       ├── features/          # Gherkin feature files
+│   │   │       ├── services/         # API Object Models (AOM)
+│   │   │       └── utils/            # API testing utilities
 │   │   └── **world.ts**              # Playwright fixtures, test setup, and environment config
 │   ├── utils/                        # Shared utility functions
 │   ├── unit/                         # Unit tests (100% coverage)
@@ -314,6 +365,8 @@ bun run test
 bun run test                    # Run all E2E tests
 bun run test:automationexercise  # Run specific challenge
 bun run test:uitestingplayground # Run specific challenge
+bun run test:jsonplaceholder     # Run JSONPlaceholder API challenge
+bun run test:reqres              # Run ReqRes.in API challenge
 bun test                        # Run unit tests with coverage
 bun ui                          # Interactive Playwright UI
 bun axe                         # Accessibility audit
@@ -394,6 +447,8 @@ Each challenge must define its own `BASE_URL_<CHALLENGE>` variable (accessed via
 
 - `BASE_URL_UITESTINGPLAYGROUND`
 - `BASE_URL_AUTOMATIONEXERCISE`
+- `BASE_URL_JSONPLACEHOLDER`
+- `BASE_URL_REQRES`
 
 ### BDD with Gherkin
 
@@ -405,6 +460,21 @@ Feature files are located within each challenge folder. Test files are automatic
 - `timing-synchronization.feature` - 7 scenarios
 - `interaction-challenges.feature` - 5 scenarios
 - `advanced-challenges.feature` - 6 scenarios
+
+**JSONPlaceholder API Features:**
+
+- `posts.feature` - 5 scenarios
+- `users.feature` - 5 scenarios
+- `comments.feature` - 6 scenarios
+- `albums.feature` - 6 scenarios
+- `photos.feature` - 6 scenarios
+- `todos.feature` - 6 scenarios
+
+**ReqRes.in API Features:**
+
+- `authentication.feature` - 4 scenarios (currently skipped due to API 401 responses)
+- `users.feature` - 6 scenarios (3 skipped for write operations)
+- `pagination.feature` - 3 scenarios
 
 ## AI Assistance
 
@@ -448,6 +518,23 @@ This project uses comprehensive code quality tooling:
 - **TypeScript**: Real-time type checking
 - **CSpell**: Spell checking integrated into ESLint
 - **EditorConfig**: Consistent formatting across editors
+
+**IDE-Agnostic Configuration:**
+
+This repository is designed to work with any IDE or editor. Universal configuration files ensure consistent formatting and behavior:
+
+- **`.editorconfig`** - Works with all major editors (VS Code, IntelliJ, Vim, etc.)
+- **`.gitattributes`** - Ensures consistent line endings (LF) and whitespace handling across platforms
+- **`.prettierrc`** / `prettier.config.ts` - Formatting rules (works with Prettier extensions in any editor)
+- **`.typos.toml`** - Typo detection configuration (works with `typos` CLI tool)
+- **`.coderabbit.yaml`** - CodeRabbit AI PR review configuration (GitHub integration)
+
+**Optional IDE-Specific Files:**
+
+- **`main.code-workspace`** - VS Code workspace configuration (optional, for VS Code users)
+  - Includes recommended extensions, format-on-save, and Cucumber/Gherkin support
+  - Not required - all functionality works without it
+- **`.cursor/rules/`** - Cursor IDE-specific AI rules (can be adapted for other AI assistants)
 
 **Automatic Versioning:**
 
