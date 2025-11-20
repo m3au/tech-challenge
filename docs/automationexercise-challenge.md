@@ -46,14 +46,12 @@ Account management, order history, invoice downloads, and contact form submissio
 **Feature File**: `user-authentication.feature`
 
 1. **Register a new user**
-
    - Generates unique test user data
    - Completes multi-step registration form
    - Handles account creation confirmation
    - Verifies successful registration and auto-login
 
 2. **Login with valid credentials**
-
    - Uses API-provisioned test user
    - Fills login form with registered credentials
    - Verifies successful authentication
@@ -71,13 +69,11 @@ Account management, order history, invoice downloads, and contact form submissio
 **Feature File**: `product-browsing.feature`
 
 1. **View all products**
-
    - Navigates to products page
    - Verifies product listing display
    - Confirms multiple products visible
 
 2. **Search for products**
-
    - Enters search term
    - Submits search query
    - Verifies filtered results
@@ -89,29 +85,21 @@ Account management, order history, invoice downloads, and contact form submissio
 
 **Page Objects**: `products-page.ts`, `product-details-page.ts`
 
-### Shopping Cart (4 scenarios)
+### Shopping Cart (3 scenarios)
 
 **Feature File**: `shopping-cart.feature`
 
 1. **Add product to cart**
-
    - Adds product from products page
    - Verifies success message
    - Confirms product in cart
 
 2. **View cart**
-
    - Navigates to cart page
    - Verifies all cart items displayed
    - Confirms cart contents
 
-3. **Update product quantity in cart**
-
-   - Modifies quantity input
-   - Verifies cart total updates
-   - Confirms quantity change reflected
-
-4. **Remove product from cart**
+3. **Remove product from cart**
    - Removes item from cart
    - Verifies product removal
    - Confirms cart state updated
@@ -123,7 +111,6 @@ Account management, order history, invoice downloads, and contact form submissio
 **Feature File**: `checkout.feature`
 
 1. **Place order with delivery address**
-
    - Reviews order details
    - Enters delivery comments
    - Submits order
@@ -137,24 +124,21 @@ Account management, order history, invoice downloads, and contact form submissio
 
 **Page Objects**: `checkout-page.ts`, `payment-page.ts`, `order-confirmation-page.ts`
 
-### User Account Management (4 scenarios)
+### User Account Management (2 scenarios)
 
 **Feature File**: `user-account.feature`
 
 1. **View account dashboard**
-
    - Navigates to account page
    - Verifies account information display
    - Confirms dashboard loaded
 
 2. **Update account information**
-
    - Modifies account details
    - Submits update
    - Verifies success message
 
 3. **View order history**
-
    - Navigates to orders section
    - Verifies order list displayed
    - Confirms historical orders visible
@@ -171,7 +155,6 @@ Account management, order history, invoice downloads, and contact form submissio
 **Feature File**: `contact-support.feature`
 
 1. **Submit contact form**
-
    - Fills contact form (name, email, subject, message)
    - Submits form
    - Verifies success message
@@ -194,13 +177,13 @@ All scenarios organized into 6 feature files:
 tests/e2e/challenges/automationexercise/features/
 ├── user-authentication.feature      # 3 scenarios
 ├── product-browsing.feature         # 3 scenarios
-├── shopping-cart.feature            # 4 scenarios
+├── shopping-cart.feature            # 3 scenarios
 ├── checkout.feature                 # 2 scenarios
-├── user-account.feature             # 4 scenarios
+├── user-account.feature             # 2 scenarios
 └── contact-support.feature          # 2 scenarios
 ```
 
-**Total**: 18 test scenarios
+**Total**: 15 test scenarios
 
 ### Page Object Models
 
@@ -447,7 +430,7 @@ interface TestContext {
 
 ## Continuous Integration
 
-All 18 scenarios run automatically in CI/CD:
+All 15 scenarios run automatically in CI/CD:
 
 - **Pre-flight checks**: Lint + unit tests
 - **E2E execution**: All AutomationExercise scenarios

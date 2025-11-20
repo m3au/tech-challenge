@@ -7,7 +7,7 @@
 [![CI](https://github.com/m3au/playwright-bdd-cursor-template/actions/workflows/ci.yml/badge.svg)](https://github.com/m3au/playwright-bdd-cursor-template/actions/workflows/ci.yml)
 [![Playwright](https://img.shields.io/badge/Playwright-1.56.1-green)](https://playwright.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue)](https://www.typescriptlang.org/)
-[![Bun](https://img.shields.io/badge/Bun-1.3.1-black)](https://bun.sh/)
+[![Bun](https://img.shields.io/badge/Bun-1.3.2-black)](https://bun.sh/)
 [![BDD](https://img.shields.io/badge/BDD-Gherkin-green)](https://cucumber.io/docs/gherkin/)
 [![Axe Accessibility](https://img.shields.io/badge/Axe%20Accessibility-4.11.0-blue)](https://github.com/dequelabs/axe-core)
 [![Lighthouse](https://img.shields.io/badge/Lighthouse-13.0.1-blue)](https://developer.chrome.com/docs/lighthouse/)
@@ -99,7 +99,7 @@ This is a **production-ready Playwright BDD testing template** optimized for Cur
 The template includes two complete challenge implementations demonstrating real-world patterns:
 
 - **UITestingPlayground** — 23 scenarios covering element identification, timing, interactions, and advanced UI challenges
-- **AutomationExercise** — 18 e-commerce scenarios including authentication, product browsing, cart management, checkout, and account features
+- **AutomationExercise** — 15 e-commerce scenarios including authentication, product browsing, cart management, checkout, and account features
 
 ### Key Features
 
@@ -123,9 +123,9 @@ The template includes two complete challenge implementations demonstrating real-
 **📚 Challenge Documentation**: For comprehensive details on each challenge, see:
 
 - **[UITestingPlayground Challenge Documentation](./docs/uitestingplayground-challenge.md)** - Complete guide to all 23 scenarios
-- **[AutomationExercise Challenge Documentation](./docs/automationexercise-challenge.md)** - Complete guide to all 18 scenarios
+- **[AutomationExercise Challenge Documentation](./docs/automationexercise-challenge.md)** - Complete guide to all 15 scenarios
 - **[JSONPlaceholder API Challenge Documentation](./docs/jsonplaceholder-challenge.md)** - Complete guide to all 34 API scenarios
-- **[ReqRes.in API Challenge Documentation](./docs/reqres-challenge.md)** - Complete guide to authentication and pagination API scenarios
+- **[ReqRes.in API Challenge Documentation](./docs/reqres-challenge.md)** - Complete guide to all 13 authentication and pagination API scenarios
 
 ### UITestingPlayground Challenge
 
@@ -170,15 +170,15 @@ All scenarios are implemented using **BDD (Gherkin)** feature files and **Page O
 
 ### AutomationExercise Challenge
 
-This challenge implements **18 comprehensive e-commerce test scenarios** covering the complete user journey from registration to order completion. See the [full challenge documentation](./docs/automationexercise-challenge.md) for exhaustive details.
+This challenge implements **15 comprehensive e-commerce test scenarios** covering the complete user journey from registration to order completion. See the [full challenge documentation](./docs/automationexercise-challenge.md) for exhaustive details.
 
 **Implemented Features**:
 
 - **User Authentication** (3 scenarios) — Registration, login, logout with API-backed user provisioning
 - **Product Browsing** (3 scenarios) — Product listing, search, and detailed product views
-- **Shopping Cart** (4 scenarios) — Add, view, update, and remove products from cart
+- **Shopping Cart** (3 scenarios) — Add, view, and remove products from cart
 - **Checkout Process** (2 scenarios) — Order placement, payment processing, and confirmation
-- **User Account Management** (4 scenarios) — Account dashboard, profile updates, order history, invoice downloads
+- **User Account Management** (2 scenarios) — Account dashboard and profile updates
 - **Contact & Support** (2 scenarios) — Contact form submission with file uploads
 
 **Key Platform Handling**:
@@ -218,6 +218,8 @@ This challenge demonstrates **authentication and pagination testing patterns** u
 - **Users API** (6 scenarios) — User CRUD operations and pagination
 - **Pagination** (3 scenarios) — Testing paginated data retrieval
 
+**Total**: 13 test scenarios
+
 **Key Features**:
 
 - **Token Management** — Utility for managing authentication tokens
@@ -251,7 +253,7 @@ This project includes **comprehensive performance/load testing** using Artillery
 
 Check 👉🏼 [GitHub Pages HTML Report](https://m3au.github.io/playwright-bdd-cursor-template/) for the _**Interactive HTML reports**_ generated automatically from Playwright test runs, including test results, traces, screenshots, accessibility/performance audit reports, and performance load test results.
 
-View workflow runs 👉🏼 [GitHub Actions](https://github.com/m3au/playwright-bdd-cursor-template/actions), we're running **80 E2E test scenarios** (23 UITestingPlayground + 18 AutomationExercise + 34 JSONPlaceholder API + 5 ReqRes.in API) and **performance load tests** for JSONPlaceholder, ReqRes.in, and HTTPBin APIs using 2 shards (WORKERS=50% per shard).
+View workflow runs 👉🏼 [GitHub Actions](https://github.com/m3au/playwright-bdd-cursor-template/actions), we're running **85 E2E test scenarios** (23 UITestingPlayground + 15 AutomationExercise + 34 JSONPlaceholder API + 13 ReqRes.in API) and **performance load tests** for JSONPlaceholder, ReqRes.in, and HTTPBin APIs using 2 shards (WORKERS=50% per shard).
 
 ---
 
@@ -393,11 +395,11 @@ bun run test                    # Run all E2E tests
 bun run test:automationexercise  # Run specific challenge
 bun run test:uitestingplayground # Run specific challenge
 bun run test:jsonplaceholder     # Run JSONPlaceholder API challenge
-bun run test:reqres              # Run ReqRes.in API challenge
+bun run test -- --project=reqres-api  # Run ReqRes.in API challenge
 bun run test:performance         # Run all performance load tests
 bun run test:performance:jsonplaceholder  # Run JSONPlaceholder load tests
-bun run test:performance:reqres  # Run ReqRes.in load tests
-bun run test:performance:httpbin # Run HTTPBin load tests
+bun run test -- --project=reqres-performance  # Run ReqRes.in load tests
+bun run test -- --project=httpbin-performance  # Run HTTPBin load tests
 bun test                        # Run unit tests with coverage
 bun ui                          # Interactive Playwright UI
 bun axe                         # Accessibility audit

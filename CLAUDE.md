@@ -19,7 +19,7 @@ This is the Playwright BDD Cursor Template repository - a production-ready E2E t
 Tests are organized by challenge in `tests/e2e/challenges/`:
 
 - `tests/e2e/challenges/uitestingplayground/` - UI testing challenges (23 scenarios)
-- `tests/e2e/challenges/automationexercise/` - E-commerce challenges (18 scenarios)
+- `tests/e2e/challenges/automationexercise/` - E-commerce challenges (15 scenarios)
 - `tests/e2e/challenges/jsonplaceholder/` - API testing challenges (34 scenarios)
 
 Each challenge contains:
