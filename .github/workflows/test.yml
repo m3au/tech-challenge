@@ -45,7 +45,30 @@ jobs:
           cp .env.production .env
 
       - name: Run tests (shard ${{ matrix.shard }}/2)
-        run: bun run test -- --shard=${{ matrix.shard }}/2
+        run: |
+          PROJECTS=""
+          CHROMIUM=$(grep "^CHROMIUM=" .env | cut -d'=' -f2 || echo "")
+          FIREFOX=$(grep "^FIREFOX=" .env | cut -d'=' -f2 || echo "")
+          WEBKIT=$(grep "^WEBKIT=" .env | cut -d'=' -f2 || echo "")
+          if [ "$CHROMIUM" = "1" ]; then
+            PROJECTS="$PROJECTS --project=uitestingplayground-chromium --project=automationexercise-chromium"
+          fi
+          if [ "$FIREFOX" = "1" ]; then
+            PROJECTS="$PROJECTS --project=uitestingplayground-firefox --project=automationexercise-firefox"
+          fi
+          if [ "$WEBKIT" = "1" ]; then
+            PROJECTS="$PROJECTS --project=uitestingplayground-webkit --project=automationexercise-webkit"
+          fi
+          if [ -z "$PROJECTS" ]; then
+            # Fallback: exclude audit projects by test name pattern
+            bun run test -- --shard=${{ matrix.shard }}/2 --grep-invert="lighthouse audit|accessibility audit"
+          else
+            bun run test -- --shard=${{ matrix.shard }}/2 $PROJECTS
+          fi
+
+      - name: Generate challenge summary
+        if: always()
+        run: bun scripts/generate-challenge-summary.ts
 
       - name: Add E2E test summary
         if: always()
@@ -58,5 +81,14 @@ jobs:
         with:
           name: blob-report-shard-${{ matrix.shard }}
           path: blob-report/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Upload challenge summary
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: challenges-summary
+          path: test-output/challenges/
           retention-days: 30
           if-no-files-found: ignore

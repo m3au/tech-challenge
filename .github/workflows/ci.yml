@@ -88,6 +88,22 @@ jobs:
             rmdir playwright-report || true
           fi
 
+      - name: Generate challenge summary
+        continue-on-error: true
+        run: bun scripts/generate-challenge-summary.ts
+
+      - name: Generate bugs reports
+        continue-on-error: true
+        run: bun scripts/generate-bugs-report.ts
+
+      - name: Download challenge summary
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: challenges-summary
+          path: test-output/challenges/
+          if-no-files-found: ignore
+
       - name: Download Lighthouse reports
         uses: actions/download-artifact@v4
         continue-on-error: true
@@ -118,7 +134,7 @@ jobs:
 
       - name: Create placeholder pages for missing reports
         run: |
-          mkdir -p test-output/lighthouse test-output/axe test-output/playwright-report test-output/unit-tests
+          mkdir -p test-output/lighthouse test-output/axe test-output/playwright-report test-output/unit-tests test-output/challenges
           if [ ! -f "test-output/lighthouse/index.html" ]; then
             cp .github/templates/lighthouse-report.html test-output/lighthouse/index.html
           fi
@@ -127,6 +143,9 @@ jobs:
           fi
           if [ ! -f "test-output/playwright-report/index.html" ]; then
             echo '<!doctype html><html><head><title>Playwright Report Unavailable</title></head><body><h1>Playwright Report Unavailable</h1><p>No test reports were generated. Check CI logs for details.</p></body></html>' > test-output/playwright-report/index.html
+          fi
+          if [ ! -f "test-output/challenges/index.html" ]; then
+            bun scripts/generate-challenge-summary.ts
           fi
           if [ ! -f "test-output/unit-tests/index.html" ]; then
             cp .github/templates/unit-tests-report.html test-output/unit-tests/index.html
