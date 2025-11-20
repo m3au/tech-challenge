@@ -45,7 +45,7 @@ export interface CreateUserResponse {
   createdAt: string;
 }
 
-@Fixture('UsersService')
+@Fixture('ReqresUsersService')
 export class UsersService {
   constructor(private request: APIRequestContext) {}
 

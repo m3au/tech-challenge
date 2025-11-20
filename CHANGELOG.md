@@ -24,6 +24,14 @@
 
 - properly narrow TypeScript types in cart-page.ts
 
+## [🐛 Fix detected: 1.16.2 -> 1.16.3
+
+1.16.3] - 2025-11-20
+
+### Fixed
+
+- **e2e**: fix automationexercise tests and reqres API key requirement
+
 ## [1.15.0] - 2025-11-20
 
 ### Added

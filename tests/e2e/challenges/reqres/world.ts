@@ -26,7 +26,7 @@ export const test = bddTest.extend<{
   testInfo: TestInfo;
   request: APIRequestContext;
   AuthService: AuthService;
-  UsersService: UsersService;
+  ReqresUsersService: UsersService;
   world: {
     request: APIRequestContext;
     data: ReturnType<typeof getEnvironment>;
@@ -39,8 +39,16 @@ export const test = bddTest.extend<{
   },
   request: async ({ playwright }, use) => {
     const baseURL = environment('BASE_URL_REQRES')!;
+    // ReqRes.in now requires an API key header (free tier: reqres-free-v1)
+    // Get your free API key at: https://reqres.in/signup
+    const apiKey = environment('REQRES_API_KEY') || 'reqres-free-v1';
     const requestContext = await playwright.request.newContext({
       baseURL,
+      extraHTTPHeaders: {
+        'User-Agent': 'Playwright Test',
+        Accept: 'application/json',
+        'x-api-key': apiKey,
+      },
     });
     await use(requestContext);
     await requestContext.dispose();
@@ -48,7 +56,7 @@ export const test = bddTest.extend<{
   AuthService: async ({ request }, use) => {
     await use(new AuthService(request));
   },
-  UsersService: async ({ request }, use) => {
+  ReqresUsersService: async ({ request }, use) => {
     await use(new UsersService(request));
   },
   world: async ({ request, testInfo }, use) => {

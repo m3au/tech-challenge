@@ -1,7 +1,9 @@
 import type { APIRequestContext } from '@playwright/test';
-import { ResponseVerifier } from '../utils/response-verifier';
-import { setLastResponse } from '../utils/response-tracker';
+
 import { expect, Fixture, Given, Then, When, Step } from '@world';
+
+import { setLastResponse } from '../utils/response-tracker';
+import { ResponseVerifier } from '../utils/response-verifier';
 
 export interface User {
   id: number;
@@ -27,16 +29,25 @@ export interface User {
   };
 }
 
-@Fixture('UsersService')
+@Fixture('JsonPlaceholderUsersService')
 export class UsersService {
   constructor(private request: APIRequestContext) {}
 
   private readonly usersEndpoint = '/users';
   private readonly userByIdEndpoint = (id: number) => `/users/${id}`;
 
-  private lastResponse: Awaited<ReturnType<APIRequestContext['get'] | APIRequestContext['post'] | APIRequestContext['put'] | APIRequestContext['delete']>> | null = null;
-  private lastUsers: User[] | null = null;
-  private lastUser: User | null = null;
+  private lastResponse:
+    | Awaited<
+        ReturnType<
+          | APIRequestContext['get']
+          | APIRequestContext['post']
+          | APIRequestContext['put']
+          | APIRequestContext['delete']
+        >
+      >
+    | undefined = undefined;
+  private lastUsers: User[] | undefined = undefined;
+  private lastUser: User | undefined = undefined;
 
   @Given('I retrieve all users')
   async getAllUsers(): Promise<void> {
@@ -64,7 +75,13 @@ export class UsersService {
   @When('I create a new user with name {string} and email {string}')
   async createUser(name: string, email: string): Promise<void> {
     const response = await this.request.post(this.usersEndpoint, {
-      data: { name, email, username: name.toLowerCase().replace(/\s+/g, ''), phone: '1-234-567-8900', website: 'example.com' },
+      data: {
+        name,
+        email,
+        username: name.toLowerCase().replaceAll(/\s+/g, ''),
+        phone: '1-234-567-8900',
+        website: 'example.com',
+      },
     });
     this.lastResponse = response;
     setLastResponse(response);
@@ -75,7 +92,14 @@ export class UsersService {
   @When('I update user {int} with name {string}')
   async updateUser(id: number, name: string): Promise<void> {
     const response = await this.request.put(this.userByIdEndpoint(id), {
-      data: { id, name, username: 'updated', email: 'updated@example.com', phone: '1-234-567-8900', website: 'example.com' },
+      data: {
+        id,
+        name,
+        username: 'updated',
+        email: 'updated@example.com',
+        phone: '1-234-567-8900',
+        website: 'example.com',
+      },
     });
     this.lastResponse = response;
     setLastResponse(response);

@@ -12,7 +12,6 @@ import {
   environment,
 } from '@utils';
 
-import { expect } from '@playwright/test';
 export type { APIRequestContext, TestInfo } from '@playwright/test';
 export { Fixture, Given, Then, When } from 'playwright-bdd/decorators';
 export type { TestContext } from '@utils';
@@ -31,7 +30,7 @@ export const test = bddTest.extend<{
   testInfo: TestInfo;
   request: APIRequestContext;
   PostsService: PostsService;
-  UsersService: UsersService;
+  JsonPlaceholderUsersService: UsersService;
   CommentsService: CommentsService;
   AlbumsService: AlbumsService;
   PhotosService: PhotosService;
@@ -57,7 +56,7 @@ export const test = bddTest.extend<{
   PostsService: async ({ request }, use) => {
     await use(new PostsService(request));
   },
-  UsersService: async ({ request }, use) => {
+  JsonPlaceholderUsersService: async ({ request }, use) => {
     await use(new UsersService(request));
   },
   CommentsService: async ({ request }, use) => {
@@ -103,4 +102,3 @@ export const test = bddTest.extend<{
     }
   },
 });
-
